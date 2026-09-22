@@ -425,7 +425,41 @@
       </section>
 
     </div>
+<!-- LIVE CONTROL — SECTION 3 -->
+    <section id="liveControl" class="admin-only" style="display:none;">
+  <h2>LIVE CONTROL</h2>
 
+  <div class="live-status">
+    <span class="live-dot"></span>
+    <strong>LIVE</strong>
+  </div>
+
+  <div class="match-control">
+    <label for="currentMatch">MATCH</label>
+
+    <div class="number-control">
+      <button type="button" onclick="changeMatch(-1)">−</button>
+
+      <input
+        id="currentMatch"
+        type="number"
+        min="1"
+        value="1"
+        onchange="setMatch(this.value)"
+      >
+
+      <button type="button" onclick="changeMatch(1)">+</button>
+    </div>
+  </div>
+
+  <button
+    type="button"
+    id="finalizeTournamentBtn"
+    onclick="finalizeTournament()"
+  >
+    FINALIZE TOURNAMENT
+  </button>
+</section>
 
     <!-- =========================
          LEADERBOARD
