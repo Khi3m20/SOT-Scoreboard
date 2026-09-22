@@ -1,3 +1,7 @@
+/* =========================================================
+   SOT HUB — RED / ORANGE / WHITE / BLACK ESPORTS VISUAL
+========================================================= */
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -5,30 +9,28 @@
 }
 
 :root {
-  --bg: #070707;
-  --bg2: #0d0d0d;
+  --black: #050505;
+  --black2: #0a0a0a;
+  --black3: #111111;
 
-  --panel: #111111;
-  --panel2: #181818;
-  --panel3: #202020;
+  --red: #e10613;
+  --red2: #ff2433;
+  --dark-red: #7d0008;
 
-  --border: #2a2a2a;
-  --border-red: #6f2023;
+  --orange: #ff6a00;
+  --orange2: #ff9d32;
 
-  --text: #f7f7f7;
-  --muted: #969696;
+  --white: #ffffff;
+  --gray: #a7a7a7;
+  --gray2: #555;
 
-  --red: #d71920;
-  --red-light: #ff343b;
-  --red-dark: #8f1116;
-
-  --danger: #ff5a60;
+  --border: rgba(255,255,255,.11);
 }
 
 
-/* =========================
-   GLOBAL
-========================= */
+/* =========================================================
+   BODY
+========================================================= */
 
 html {
   scroll-behavior: smooth;
@@ -36,8 +38,7 @@ html {
 
 body {
   min-height: 100vh;
-
-  color: var(--text);
+  color: var(--white);
 
   font-family:
     Arial,
@@ -46,19 +47,24 @@ body {
 
   background:
     radial-gradient(
-      circle at 85% 5%,
-      rgba(215, 25, 32, 0.12),
-      transparent 28%
+      circle at 10% 5%,
+      rgba(225,6,19,.20),
+      transparent 25%
     ),
     radial-gradient(
-      circle at 10% 40%,
-      rgba(215, 25, 32, 0.06),
-      transparent 25%
+      circle at 90% 15%,
+      rgba(255,106,0,.16),
+      transparent 24%
+    ),
+    radial-gradient(
+      circle at 50% 90%,
+      rgba(225,6,19,.08),
+      transparent 30%
     ),
     linear-gradient(
       135deg,
-      #050505,
-      #0b0b0b 50%,
+      #030303,
+      #0a0a0a 48%,
       #050505
     );
 
@@ -66,55 +72,111 @@ body {
 }
 
 
-/* subtle diagonal background */
+/* =========================================================
+   FLOWING BACKGROUND LINES
+========================================================= */
 
 body::before {
   content: "";
 
   position: fixed;
 
-  inset: 0;
+  width: 900px;
+  height: 900px;
+
+  top: -300px;
+  right: -250px;
+
+  border-radius: 50%;
+
+  border:
+    2px solid rgba(255,255,255,.035);
+
+  box-shadow:
+    0 0 0 45px rgba(225,6,19,.025),
+    0 0 0 90px rgba(255,106,0,.025),
+    0 0 0 140px rgba(255,255,255,.02),
+    0 0 0 190px rgba(225,6,19,.018);
+
+  transform: rotate(-20deg);
 
   pointer-events: none;
 
-  opacity: 0.18;
-
-  background-image:
-    repeating-linear-gradient(
-      135deg,
-      transparent 0px,
-      transparent 55px,
-      rgba(255, 255, 255, 0.018) 56px,
-      transparent 57px
-    );
-
-  z-index: -1;
+  z-index: -2;
 }
 
 
-/* =========================
+/* second flowing shape */
+
+body::after {
+  content: "";
+
+  position: fixed;
+
+  width: 700px;
+  height: 700px;
+
+  bottom: -350px;
+  left: -250px;
+
+  border-radius: 50%;
+
+  border:
+    2px solid rgba(255,106,0,.07);
+
+  box-shadow:
+    0 0 0 35px rgba(255,106,0,.025),
+    0 0 0 75px rgba(225,6,19,.025),
+    0 0 0 120px rgba(255,255,255,.018);
+
+  transform: rotate(25deg);
+
+  pointer-events: none;
+
+  z-index: -2;
+}
+
+
+/* =========================================================
    HEADER
-========================= */
+========================================================= */
 
 .topbar {
   position: sticky;
-
   top: 0;
-
   z-index: 100;
 
   background:
     linear-gradient(
-      180deg,
-      rgba(8, 8, 8, 0.98),
-      rgba(8, 8, 8, 0.94)
+      90deg,
+      rgba(5,5,5,.98),
+      rgba(15,5,5,.96),
+      rgba(5,5,5,.98)
     );
 
   border-bottom:
-    1px solid var(--border);
+    1px solid rgba(255,255,255,.1);
 
   box-shadow:
-    0 8px 30px rgba(0, 0, 0, 0.45);
+    0 8px 35px rgba(0,0,0,.7);
+}
+
+.topbar::after {
+  content: "";
+
+  display: block;
+
+  height: 3px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--red),
+      var(--orange),
+      white,
+      var(--orange),
+      var(--red)
+    );
 }
 
 .brand {
@@ -132,49 +194,78 @@ body::before {
 }
 
 
-/* SOT logo block */
+/* logo */
 
 .logo {
-  width: 50px;
-  height: 50px;
+  position: relative;
 
-  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
 
   display: flex;
 
   align-items: center;
   justify-content: center;
 
-  border-radius: 10px;
-
-  background:
-    linear-gradient(
-      145deg,
-      var(--red-light),
-      var(--red-dark)
-    );
+  overflow: hidden;
 
   color: white;
 
-  font-size: 14px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--red),
+      var(--orange)
+    );
 
-  font-weight: 900;
+  border-radius: 12px;
+
+  font-weight: 1000;
+  font-size: 14px;
 
   letter-spacing: 1px;
 
   box-shadow:
-    0 0 25px rgba(215, 25, 32, 0.25),
-    inset 0 1px rgba(255, 255, 255, 0.2);
+    0 0 25px rgba(225,6,19,.3),
+    0 0 45px rgba(255,106,0,.12);
 
-  transform: skew(-4deg);
+  transform: skew(-5deg);
+}
+
+.logo::before {
+  content: "";
+
+  position: absolute;
+
+  width: 90px;
+  height: 15px;
+
+  background: rgba(255,255,255,.25);
+
+  transform:
+    rotate(-45deg)
+    translateX(-60px);
+}
+
+.logo::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 4px;
+
+  border:
+    1px solid rgba(255,255,255,.35);
+
+  border-radius: 9px;
 }
 
 .brand h1 {
-  font-size: 21px;
+  font-size: 22px;
 
-  font-weight: 900;
+  font-weight: 1000;
 
-  letter-spacing: 1.5px;
+  letter-spacing: 1.8px;
 }
 
 .brand span {
@@ -182,17 +273,17 @@ body::before {
 
   margin-top: 3px;
 
-  color: var(--muted);
+  color: #aaa;
 
   font-size: 12px;
 
-  letter-spacing: 0.4px;
+  letter-spacing: .6px;
 }
 
 
-/* =========================
+/* =========================================================
    MAIN
-========================= */
+========================================================= */
 
 .container {
   max-width: 1400px;
@@ -200,81 +291,90 @@ body::before {
   margin: auto;
 
   padding:
-    32px 24px 55px;
+    35px 24px 60px;
 }
 
 
-/* =========================
-   STATS
-========================= */
+/* =========================================================
+   STAT CARDS
+========================================================= */
 
 .stats-grid {
   display: grid;
 
   grid-template-columns:
-    repeat(3, 1fr);
+    repeat(3,1fr);
 
   gap: 18px;
 
-  margin-bottom: 24px;
+  margin-bottom: 25px;
 }
 
 .stat-card {
   position: relative;
 
+  min-height: 130px;
+
   overflow: hidden;
 
-  min-height: 125px;
-
-  padding: 22px;
+  padding: 23px;
 
   background:
     linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.045),
-      rgba(255, 255, 255, 0.012)
+      rgba(255,255,255,.075),
+      rgba(255,255,255,.018)
     );
 
   border:
     1px solid var(--border);
 
-  border-radius: 14px;
+  border-radius: 15px;
 
   box-shadow:
-    0 12px 30px rgba(0, 0, 0, 0.28);
+    0 18px 45px rgba(0,0,0,.4),
+    inset 0 1px rgba(255,255,255,.04);
 
   transition:
-    transform 0.2s,
-    border-color 0.2s;
+    .25s ease;
 }
 
 .stat-card:hover {
-  transform: translateY(-2px);
+  transform:
+    translateY(-5px)
+    rotateX(1deg);
 
   border-color:
-    rgba(215, 25, 32, 0.55);
+    rgba(255,106,0,.45);
+
+  box-shadow:
+    0 20px 50px rgba(0,0,0,.55),
+    0 0 30px rgba(225,6,19,.08);
 }
 
 
-/* red corner decoration */
+/* giant flowing decoration */
 
 .stat-card::before {
   content: "";
 
   position: absolute;
 
-  top: 0;
-  left: 0;
+  width: 180px;
+  height: 180px;
 
-  width: 55px;
-  height: 3px;
+  right: -70px;
+  bottom: -90px;
 
-  background:
-    linear-gradient(
-      90deg,
-      var(--red-light),
-      transparent
-    );
+  border-radius: 50%;
+
+  border:
+    2px solid rgba(225,6,19,.22);
+
+  box-shadow:
+    0 0 0 18px rgba(255,106,0,.05),
+    0 0 0 38px rgba(225,6,19,.035),
+    0 0 0 60px rgba(255,255,255,.018);
 }
 
 .stat-card::after {
@@ -282,16 +382,19 @@ body::before {
 
   position: absolute;
 
-  right: -35px;
-  bottom: -45px;
+  top: 0;
+  left: 0;
 
-  width: 110px;
-  height: 110px;
-
-  border-radius: 50%;
+  width: 100%;
+  height: 3px;
 
   background:
-    rgba(215, 25, 32, 0.07);
+    linear-gradient(
+      90deg,
+      var(--red),
+      var(--orange),
+      transparent
+    );
 }
 
 .stat-card span {
@@ -303,13 +406,13 @@ body::before {
 
   margin-bottom: 12px;
 
-  color: var(--muted);
+  color: #999;
 
   font-size: 10px;
 
-  font-weight: 800;
+  font-weight: 900;
 
-  letter-spacing: 1.2px;
+  letter-spacing: 1.5px;
 }
 
 .stat-card strong {
@@ -317,68 +420,108 @@ body::before {
 
   z-index: 2;
 
-  font-size: 30px;
+  font-size: 31px;
 
-  font-weight: 900;
+  font-weight: 1000;
 }
 
 #topScore {
-  color: var(--red-light);
+  background:
+    linear-gradient(
+      90deg,
+      white,
+      var(--orange),
+      var(--red2)
+    );
+
+  -webkit-background-clip: text;
+  background-clip: text;
+
+  color: transparent;
 }
 
 
-/* =========================
+/* =========================================================
    PANELS
-========================= */
+========================================================= */
 
 .panel {
   position: relative;
 
   overflow: hidden;
 
-  margin-bottom: 22px;
+  margin-bottom: 23px;
 
-  padding: 23px;
+  padding: 24px;
 
   background:
     linear-gradient(
       145deg,
-      rgba(255, 255, 255, 0.035),
-      rgba(255, 255, 255, 0.012)
+      rgba(255,255,255,.055),
+      rgba(255,255,255,.012)
     );
 
   border:
-    1px solid var(--border);
+    1px solid rgba(255,255,255,.1);
 
-  border-radius: 14px;
+  border-radius: 16px;
 
   box-shadow:
-    0 14px 35px rgba(0, 0, 0, 0.28);
+    0 20px 50px rgba(0,0,0,.38),
+    inset 0 1px rgba(255,255,255,.035);
 }
 
 
-/* small red side accent */
+/* flowing panel decoration */
 
 .panel::before {
   content: "";
 
   position: absolute;
 
-  left: 0;
-  top: 22px;
+  width: 300px;
+  height: 300px;
 
-  width: 3px;
-  height: 35px;
+  top: -190px;
+  right: -120px;
 
-  background:
-    linear-gradient(
-      180deg,
-      var(--red-light),
-      transparent
-    );
+  border-radius: 50%;
+
+  border:
+    2px solid rgba(225,6,19,.12);
+
+  box-shadow:
+    0 0 0 25px rgba(255,106,0,.025),
+    0 0 0 55px rgba(255,255,255,.018),
+    0 0 0 85px rgba(225,6,19,.02);
+
+  pointer-events: none;
+}
+
+.panel::after {
+  content: "";
+
+  position: absolute;
+
+  left: -120px;
+  bottom: -180px;
+
+  width: 330px;
+  height: 330px;
+
+  border-radius: 50%;
+
+  border:
+    1px solid rgba(255,106,0,.08);
+
+  pointer-events: none;
 }
 
 .panel-title {
+  position: relative;
+
+  z-index: 2;
+
   display: flex;
 
   align-items: center;
@@ -387,31 +530,37 @@ body::before {
 
   gap: 20px;
 
-  margin-bottom: 21px;
+  margin-bottom: 22px;
 }
 
 .panel-title h2 {
   font-size: 18px;
 
-  font-weight: 900;
+  font-weight: 1000;
 
-  letter-spacing: 0.3px;
-
-  margin-bottom: 5px;
+  letter-spacing: .5px;
 }
 
 .panel-title span {
-  color: var(--muted);
+  display: block;
+
+  margin-top: 5px;
+
+  color: #999;
 
   font-size: 12px;
 }
 
 
-/* =========================
+/* =========================================================
    FORM
-========================= */
+========================================================= */
 
 .form-grid {
+  position: relative;
+
+  z-index: 2;
+
   display: grid;
 
   grid-template-columns:
@@ -422,7 +571,7 @@ body::before {
 
 .scoring-grid {
   grid-template-columns:
-    repeat(4, 1fr);
+    repeat(4,1fr);
 
   margin-bottom: 18px;
 }
@@ -436,13 +585,13 @@ body::before {
 }
 
 .field label {
-  color: #a9a9a9;
+  color: #aaa;
 
   font-size: 9px;
 
-  font-weight: 900;
+  font-weight: 1000;
 
-  letter-spacing: 1px;
+  letter-spacing: 1.2px;
 }
 
 .field input {
@@ -452,149 +601,190 @@ body::before {
 
   outline: none;
 
-  color: var(--text);
+  color: white;
 
   background:
     linear-gradient(
       145deg,
-      #191919,
-      #111111
+      #1b1b1b,
+      #101010
     );
 
   border:
-    1px solid var(--border);
+    1px solid #333;
 
   border-radius: 8px;
 
   font-size: 14px;
 
-  transition:
-    border-color 0.2s,
-    box-shadow 0.2s;
+  transition: .2s;
 }
 
 .field input:hover {
-  border-color: #414141;
+  border-color: #555;
 }
 
 .field input:focus {
-  border-color: var(--red);
+  border-color: var(--orange);
 
   box-shadow:
-    0 0 0 2px
-    rgba(215, 25, 32, 0.12),
-    0 0 18px
-    rgba(215, 25, 32, 0.08);
+    0 0 0 2px rgba(255,106,0,.12),
+    0 0 25px rgba(255,106,0,.08);
 }
 
 .button-field {
-  min-width: 145px;
+  min-width: 150px;
 }
 
 
-/* =========================
-   BUTTONS
-========================= */
+/* =========================================================
+   COLORFUL BUTTONS
+========================================================= */
 
 .primary-btn {
   position: relative;
 
   overflow: hidden;
 
-  border: none;
+  border: 0;
 
   border-radius: 8px;
 
-  padding: 12px 18px;
-
-  background:
-    linear-gradient(
-      135deg,
-      var(--red-light),
-      var(--red-dark)
-    );
+  padding: 12px 20px;
 
   color: white;
 
-  font-size: 12px;
+  background:
+    linear-gradient(
+      110deg,
+      var(--red) 0%,
+      #f31c24 35%,
+      var(--orange) 70%,
+      #ff9a28 100%
+    );
 
-  font-weight: 900;
+  font-size: 11px;
 
-  letter-spacing: 0.6px;
+  font-weight: 1000;
+
+  letter-spacing: .8px;
 
   cursor: pointer;
 
   box-shadow:
-    0 6px 18px
-    rgba(215, 25, 32, 0.18);
+    0 8px 25px rgba(225,6,19,.2),
+    0 3px 10px rgba(255,106,0,.12);
 
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+    .22s ease;
+}
+
+.primary-btn::before {
+  content: "";
+
+  position: absolute;
+
+  top: -50%;
+  left: -30%;
+
+  width: 25%;
+  height: 200%;
+
+  background:
+    rgba(255,255,255,.35);
+
+  transform:
+    rotate(25deg);
+
+  transition:
+    .5s ease;
+}
+
+.primary-btn:hover::before {
+  left: 110%;
 }
 
 .primary-btn:hover {
-  transform: translateY(-2px);
+  transform:
+    translateY(-3px);
 
   box-shadow:
-    0 9px 25px
-    rgba(215, 25, 32, 0.3);
+    0 12px 35px rgba(225,6,19,.3),
+    0 5px 20px rgba(255,106,0,.2);
 }
 
 .primary-btn:active {
-  transform: translateY(0);
+  transform:
+    translateY(0);
 }
 
 
-/* =========================
+/* =========================================================
    SEARCH
-========================= */
+========================================================= */
 
 .search {
+  position: relative;
+
+  z-index: 2;
+
   width: 230px;
 
-  padding: 10px 13px;
+  padding: 11px 13px;
 
   outline: none;
 
-  color: var(--text);
+  color: white;
 
-  background: #151515;
+  background:
+    linear-gradient(
+      145deg,
+      #1b1b1b,
+      #101010
+    );
 
   border:
-    1px solid var(--border);
+    1px solid #333;
 
   border-radius: 8px;
 
   font-size: 13px;
 
-  transition: 0.2s;
+  transition: .2s;
 }
 
 .search:focus {
   border-color: var(--red);
 
   box-shadow:
-    0 0 0 2px
-    rgba(215, 25, 32, 0.1);
+    0 0 0 2px rgba(225,6,19,.1),
+    0 0 20px rgba(225,6,19,.08);
 }
 
 
-/* =========================
+/* =========================================================
    TABLE
-========================= */
+========================================================= */
 
 .table-wrapper {
+  position: relative;
+
+  z-index: 2;
+
   width: 100%;
 
   overflow-x: auto;
 
   border:
-    1px solid var(--border);
+    1px solid #292929;
 
-  border-radius: 10px;
+  border-radius: 12px;
 
-  background: #0d0d0d;
+  background:
+    rgba(5,5,5,.75);
+
+  box-shadow:
+    inset 0 0 40px rgba(225,6,19,.025);
 }
 
 table {
@@ -609,34 +799,35 @@ thead {
   background:
     linear-gradient(
       90deg,
+      #1a0808,
       #181818,
-      #121212
+      #1b0b04
     );
 }
 
 th {
   padding: 14px 10px;
 
-  color: #9d9d9d;
+  color: #aaa;
 
   font-size: 9px;
 
-  font-weight: 900;
+  font-weight: 1000;
 
-  letter-spacing: 0.9px;
+  letter-spacing: 1px;
 
   text-align: center;
 
   white-space: nowrap;
 
   border-bottom:
-    1px solid var(--border);
+    1px solid #333;
 }
 
 td {
   padding: 14px 10px;
 
-  color: #e2e2e2;
+  color: #ddd;
 
   font-size: 13px;
 
@@ -649,49 +840,65 @@ td {
 }
 
 tbody tr {
-  transition:
-    background 0.15s;
+  position: relative;
+
+  transition: .18s;
 }
 
 tbody tr:hover {
   background:
-    rgba(215, 25, 32, 0.045);
+    linear-gradient(
+      90deg,
+      rgba(225,6,19,.08),
+      rgba(255,106,0,.035),
+      transparent
+    );
 }
 
 td.player-name {
   text-align: left;
 
-  font-weight: 800;
+  font-weight: 900;
 
   color: white;
 }
 
 td.rank {
-  color: var(--red-light);
+  color: var(--orange2);
 
-  font-weight: 900;
+  font-weight: 1000;
 }
 
 td.points {
-  color: var(--red-light);
+  color: white;
 
   font-size: 16px;
 
-  font-weight: 900;
+  font-weight: 1000;
+
+  text-shadow:
+    0 0 12px rgba(255,106,0,.45);
 }
 
 
-/* action buttons */
+/* =========================================================
+   ACTION BUTTONS
+========================================================= */
 
 .action-btn {
   padding: 7px 10px;
 
-  color: #e7e7e7;
+  color: white;
 
-  background: #181818;
+  background:
+    linear-gradient(
+      135deg,
+      #202020,
+      #111
+    );
 
   border:
-    1px solid #303030;
+    1px solid #383838;
 
   border-radius: 6px;
 
@@ -699,31 +906,54 @@ td.points {
 
   cursor: pointer;
 
-  transition: 0.2s;
+  transition: .2s;
 }
 
 .action-btn:hover {
-  border-color: var(--red);
+  color: white;
 
-  background: #211112;
+  border-color: var(--orange);
+
+  background:
+    linear-gradient(
+      135deg,
+      #35140c,
+      #241010
+    );
+
+  box-shadow:
+    0 0 15px rgba(255,106,0,.1);
 }
 
 .action-btn.delete {
   margin-left: 5px;
 
-  color: var(--danger);
+  color: #ff5b61;
+}
+
+.action-btn.delete:hover {
+  color: white;
+
+  border-color: var(--red);
+
+  background:
+    var(--red);
 }
 
 
-/* =========================
-   EMPTY STATE
-========================= */
+/* =========================================================
+   EMPTY
+========================================================= */
 
 .empty-state {
-  padding:
-    35px 10px 10px;
+  position: relative;
 
-  color: var(--muted);
+  z-index: 2;
+
+  padding:
+    40px 10px 15px;
+
+  color: #777;
 
   font-size: 13px;
 
@@ -731,27 +961,32 @@ td.points {
 }
 
 
-/* =========================
+/* =========================================================
    RULES
-========================= */
+========================================================= */
 
 .rules {
   background:
     linear-gradient(
-      145deg,
-      rgba(215, 25, 32, 0.045),
-      rgba(255, 255, 255, 0.012)
+      135deg,
+      rgba(225,6,19,.065),
+      rgba(255,106,0,.035),
+      rgba(255,255,255,.012)
     );
 }
 
 .rules p {
+  position: relative;
+
+  z-index: 2;
+
   margin-bottom: 10px;
 
   color: #999;
 
   font-size: 13px;
 
-  line-height: 1.7;
+  line-height: 1.75;
 }
 
 .rules p:last-child {
@@ -763,11 +998,13 @@ td.points {
 }
 
 
-/* =========================
+/* =========================================================
    FOOTER
-========================= */
+========================================================= */
 
 footer {
+  position: relative;
+
   display: flex;
 
   justify-content: space-between;
@@ -775,50 +1012,83 @@ footer {
   gap: 15px;
 
   padding:
-    22px 24px;
+    23px 24px;
 
-  color: #707070;
+  color: #777;
 
   border-top:
-    1px solid var(--border);
+    1px solid #222;
 
   font-size: 11px;
+
+  overflow: hidden;
+}
+
+footer::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 45%;
+
+  height: 2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      var(--red),
+      var(--orange),
+      transparent
+    );
 }
 
 
-/* =========================
+/* =========================================================
    SCROLLBAR
-========================= */
+========================================================= */
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 9px;
+  height: 9px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #090909;
+  background: #070707;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #333;
+  background:
+    linear-gradient(
+      180deg,
+      var(--red),
+      var(--orange)
+    );
 
-  border-radius: 10px;
+  border-radius: 20px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--red);
+  background:
+    linear-gradient(
+      180deg,
+      var(--orange),
+      var(--red)
+    );
 }
 
 
-/* =========================
+/* =========================================================
    TABLET
-========================= */
+========================================================= */
 
 @media (max-width: 1000px) {
 
   .scoring-grid {
     grid-template-columns:
-      repeat(2, 1fr);
+      repeat(2,1fr);
   }
 
   .stats-grid {
@@ -833,9 +1103,9 @@ footer {
 }
 
 
-/* =========================
+/* =========================================================
    MOBILE
-========================= */
+========================================================= */
 
 @media (max-width: 700px) {
 
@@ -850,8 +1120,8 @@ footer {
   }
 
   .logo {
-    width: 43px;
-    height: 43px;
+    width: 44px;
+    height: 44px;
 
     font-size: 12px;
   }
@@ -861,13 +1131,13 @@ footer {
   }
 
   .brand span {
-    font-size: 11px;
+    font-size: 10px;
   }
 
   .stats-grid {
     grid-template-columns: 1fr;
 
-    gap: 12px;
+    gap: 13px;
   }
 
   .stat-card:last-child {
@@ -876,18 +1146,12 @@ footer {
 
   .stat-card {
     min-height: 105px;
-
-    padding: 18px;
-  }
-
-  .stat-card strong {
-    font-size: 26px;
   }
 
   .panel {
     padding: 17px;
 
-    border-radius: 11px;
+    border-radius: 12px;
   }
 
   .panel-title {
@@ -925,9 +1189,9 @@ footer {
 }
 
 
-/* =========================
+/* =========================================================
    SMALL PHONE
-========================= */
+========================================================= */
 
 @media (max-width: 430px) {
 
@@ -935,15 +1199,11 @@ footer {
     grid-template-columns: 1fr;
   }
 
-  .brand {
-    gap: 10px;
-  }
-
   .brand h1 {
     font-size: 15px;
   }
 
   .brand span {
-    font-size: 10px;
+    font-size: 9px;
   }
-}
+  }
