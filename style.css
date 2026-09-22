@@ -3,14 +3,15 @@
   margin: 0;
   padding: 0;
 }
+
 :root {
   --bg: #080808;
   --panel: #111111;
   --panel2: #181818;
-  --border: #2a2a2a;
+  --border: #2b2b2b;
 
   --text: #f5f5f5;
-  --muted: #929292;
+  --muted: #999999;
 
   --accent: #d82b2f;
   --accent2: #ff4a4f;
@@ -18,6 +19,10 @@
   --danger: #ff5c61;
 }
 
+
+/* =========================
+   BODY
+========================= */
 
 body {
   background: var(--bg);
@@ -33,8 +38,9 @@ body {
 
 .topbar {
   width: 100%;
+  background: #080808;
   border-bottom: 1px solid var(--border);
-  background: rgba(8, 13, 24, 0.95);
+
   position: sticky;
   top: 0;
   z-index: 10;
@@ -43,7 +49,9 @@ body {
 .brand {
   max-width: 1400px;
   margin: auto;
+
   padding: 20px 24px;
+
   display: flex;
   align-items: center;
   gap: 14px;
@@ -52,14 +60,21 @@ body {
 .logo {
   width: 48px;
   height: 48px;
-  border-radius: 12px;
+
+  border-radius: 10px;
+
   background: var(--accent);
+
   display: flex;
   align-items: center;
   justify-content: center;
+
+  color: white;
   font-weight: 900;
   font-size: 15px;
-  box-shadow: 0 0 25px rgba(118, 92, 255, 0.25);
+
+  box-shadow:
+    0 0 25px rgba(216, 43, 47, 0.25);
 }
 
 .brand h1 {
@@ -74,12 +89,13 @@ body {
 
 
 /* =========================
-   MAIN CONTAINER
+   MAIN
 ========================= */
 
 .container {
   max-width: 1400px;
   margin: auto;
+
   padding: 30px 24px 50px;
 }
 
@@ -90,24 +106,54 @@ body {
 
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+
+  grid-template-columns:
+    repeat(3, 1fr);
+
   gap: 18px;
+
   margin-bottom: 24px;
 }
 
 .stat-card {
   background: var(--panel);
+
   border: 1px solid var(--border);
-  border-radius: 16px;
+
+  border-radius: 14px;
+
   padding: 22px;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+.stat-card::before {
+  content: "";
+
+  position: absolute;
+
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 2px;
+
+  background: var(--accent);
 }
 
 .stat-card span {
   display: block;
+
   color: var(--muted);
-  font-size: 11px;
+
+  font-size: 10px;
+
   font-weight: bold;
+
   letter-spacing: 1px;
+
   margin-bottom: 10px;
 }
 
@@ -122,132 +168,101 @@ body {
 
 .panel {
   background: var(--panel);
+
   border: 1px solid var(--border);
-  border-radius: 16px;
+
+  border-radius: 14px;
+
   padding: 22px;
+
   margin-bottom: 22px;
 }
 
 .panel-title {
   display: flex;
+
   align-items: center;
+
   justify-content: space-between;
+
   gap: 20px;
+
   margin-bottom: 20px;
 }
 
 .panel-title h2 {
   font-size: 18px;
+
   margin-bottom: 5px;
 }
 
 .panel-title span {
   color: var(--muted);
+
   font-size: 13px;
 }
 
 
 /* =========================
-   FORM
-/* =========================
-   AIR CANADA THEME
-========================= */
-
-:root {
-  --bg: #080808;
-  --panel: #111111;
-  --panel2: #181818;
-  --border: #2a2a2a;
-
-  --text: #f5f5f5;
-  --muted: #929292;
-
-  --accent: #d82b2f;
-  --accent2: #ff4a4f;
-
-  --danger: #ff5c61;
-}
-
-
-/* Buttons */
-
-.primary-btn {
-  background: var(--accent);
-}
-
-.primary-btn:hover {
-  background: var(--accent2);
-}
-
-
-/* Logo */
-
-.logo {
-  background: var(--accent);
-}
-
-
-/* Focus */
-
-.field input:focus,
-.search:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(216, 43, 47, 0.12);
-}
-
-
-/* Leaderboard */
-
-td.rank,
-td.points {
-  color: var(--accent2);
-}
-
-
-/* Action buttons */
-
-.action-btn:hover {
-  border-color: var(--accent);
-}
+   FORMS
 ========================= */
 
 .form-grid {
   display: grid;
-  grid-template-columns: 1fr auto;
+
+  grid-template-columns:
+    1fr auto;
+
   gap: 14px;
 }
 
 .scoring-grid {
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns:
+    repeat(4, 1fr);
 }
 
 .field {
   display: flex;
+
   flex-direction: column;
+
   gap: 7px;
 }
 
 .field label {
   color: var(--muted);
+
   font-size: 10px;
+
   font-weight: bold;
+
   letter-spacing: 1px;
 }
 
 .field input {
   width: 100%;
+
   background: var(--panel2);
+
   color: var(--text);
+
   border: 1px solid var(--border);
-  border-radius: 9px;
+
+  border-radius: 8px;
+
   padding: 12px 13px;
+
   outline: none;
+
   font-size: 14px;
 }
 
 .field input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px rgba(118, 92, 255, 0.12);
+
+  box-shadow:
+    0 0 0 2px
+    rgba(216, 43, 47, 0.12);
 }
 
 .button-field {
@@ -261,27 +276,41 @@ td.points {
 
 .primary-btn {
   border: none;
-  border-radius: 9px;
+
+  border-radius: 8px;
+
   background: var(--accent);
+
   color: white;
+
   font-weight: bold;
+
   padding: 12px 18px;
+
   cursor: pointer;
+
   transition: 0.2s;
 }
 
 .primary-btn:hover {
   background: var(--accent2);
+
   transform: translateY(-1px);
 }
 
 .action-btn {
   border: 1px solid var(--border);
+
   background: var(--panel2);
+
   color: var(--text);
+
   border-radius: 7px;
+
   padding: 7px 10px;
+
   cursor: pointer;
+
   font-size: 12px;
 }
 
@@ -291,6 +320,7 @@ td.points {
 
 .action-btn.delete {
   color: var(--danger);
+
   margin-left: 5px;
 }
 
@@ -301,16 +331,26 @@ td.points {
 
 .search {
   width: 220px;
+
   background: var(--panel2);
+
   color: var(--text);
+
   border: 1px solid var(--border);
-  border-radius: 9px;
+
+  border-radius: 8px;
+
   padding: 10px 12px;
+
   outline: none;
 }
 
 .search:focus {
   border-color: var(--accent);
+
+  box-shadow:
+    0 0 0 2px
+    rgba(216, 43, 47, 0.12);
 }
 
 
@@ -320,12 +360,15 @@ td.points {
 
 .table-wrapper {
   width: 100%;
+
   overflow-x: auto;
 }
 
 table {
   width: 100%;
+
   min-width: 1050px;
+
   border-collapse: collapse;
 }
 
@@ -335,34 +378,47 @@ thead {
 
 th {
   color: var(--muted);
+
   font-size: 10px;
+
   letter-spacing: 0.8px;
+
   padding: 13px 10px;
+
   text-align: center;
+
   white-space: nowrap;
 }
 
 td {
   padding: 14px 10px;
+
   border-top: 1px solid var(--border);
+
   text-align: center;
+
   font-size: 13px;
+
   white-space: nowrap;
 }
 
 td.player-name {
   text-align: left;
+
   font-weight: bold;
 }
 
 td.rank {
   color: var(--accent2);
+
   font-weight: bold;
 }
 
 td.points {
   color: var(--accent2);
+
   font-weight: 900;
+
   font-size: 15px;
 }
 
@@ -373,7 +429,9 @@ td.points {
 
 .empty-state {
   text-align: center;
+
   color: var(--muted);
+
   padding: 35px 10px 10px;
 }
 
@@ -384,8 +442,11 @@ td.points {
 
 .rules p {
   color: var(--muted);
+
   font-size: 13px;
+
   line-height: 1.7;
+
   margin-bottom: 10px;
 }
 
@@ -404,11 +465,17 @@ td.points {
 
 footer {
   border-top: 1px solid var(--border);
+
   padding: 22px 24px;
+
   display: flex;
+
   justify-content: space-between;
+
   gap: 15px;
+
   color: var(--muted);
+
   font-size: 12px;
 }
 
@@ -420,11 +487,13 @@ footer {
 @media (max-width: 900px) {
 
   .scoring-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns:
+      repeat(2, 1fr);
   }
 
   .stats-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
 }
@@ -433,7 +502,8 @@ footer {
 @media (max-width: 700px) {
 
   .container {
-    padding: 20px 14px 40px;
+    padding:
+      20px 14px 40px;
   }
 
   .brand {
@@ -451,11 +521,13 @@ footer {
 
   .panel {
     padding: 16px;
-    border-radius: 13px;
+
+    border-radius: 12px;
   }
 
   .panel-title {
     align-items: flex-start;
+
     flex-direction: column;
   }
 
@@ -464,11 +536,13 @@ footer {
   }
 
   .form-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
   .scoring-grid {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+      1fr 1fr;
   }
 
   .button-field {
@@ -481,6 +555,7 @@ footer {
 
   footer {
     flex-direction: column;
+
     text-align: center;
   }
 
@@ -490,7 +565,8 @@ footer {
 @media (max-width: 430px) {
 
   .scoring-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns:
+      1fr;
   }
 
 }
