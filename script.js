@@ -1122,3 +1122,531 @@ updateAuthUI();
 updateMatchUI();
 
 render();
+// ============================================================
+// RESULT CONTROL — SECTION 4
+// ============================================================
+
+function updateResultUI() {
+
+  const resultControl =
+    document.getElementById("resultControl");
+
+  if (!resultControl) {
+    return;
+  }
+
+  // Only show result generation after tournament is FINAL
+  resultControl.style.display =
+    tournamentStatus === "FINAL" && isAdmin
+      ? "block"
+      : "none";
+}
+
+
+// ============================================================
+// GENERATE RESULT IMAGE
+// ============================================================
+
+function generateResultImage() {
+
+  if (!isAdmin) {
+    alert("Admin access required.");
+    return;
+  }
+
+  if (tournamentStatus !== "FINAL") {
+    alert("Finalize the tournament first.");
+    return;
+  }
+
+  const sortedPlayers =
+    [...players]
+      .map(player => ({
+        ...player,
+        score: calculateScore(player)
+      }))
+      .sort(
+        (a, b) =>
+          b.score - a.score
+      );
+
+  if (sortedPlayers.length === 0) {
+    alert("There are no players to include.");
+    return;
+  }
+
+
+  // Canvas
+  const canvas =
+    document.createElement("canvas");
+
+  canvas.width = 1600;
+  canvas.height = 1000;
+
+  const ctx =
+    canvas.getContext("2d");
+
+
+  // ========================================================
+  // BACKGROUND
+  // ========================================================
+
+  const gradient =
+    ctx.createLinearGradient(
+      0,
+      0,
+      1600,
+      1000
+    );
+
+  gradient.addColorStop(
+    0,
+    "#080a0f"
+  );
+
+  gradient.addColorStop(
+    0.55,
+    "#11151d"
+  );
+
+  gradient.addColorStop(
+    1,
+    "#210b12"
+  );
+
+  ctx.fillStyle =
+    gradient;
+
+  ctx.fillRect(
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+
+
+  // Decorative red glow
+  const glow =
+    ctx.createRadialGradient(
+      150,
+      100,
+      20,
+      150,
+      100,
+      500
+    );
+
+  glow.addColorStop(
+    0,
+    "rgba(255,63,79,0.25)"
+  );
+
+  glow.addColorStop(
+    1,
+    "rgba(255,63,79,0)"
+  );
+
+  ctx.fillStyle =
+    glow;
+
+  ctx.fillRect(
+    0,
+    0,
+    700,
+    600
+  );
+
+
+  // Decorative orange glow
+  const orangeGlow =
+    ctx.createRadialGradient(
+      1450,
+      850,
+      20,
+      1450,
+      850,
+      500
+    );
+
+  orangeGlow.addColorStop(
+    0,
+    "rgba(255,157,61,0.18)"
+  );
+
+  orangeGlow.addColorStop(
+    1,
+    "rgba(255,157,61,0)"
+  );
+
+  ctx.fillStyle =
+    orangeGlow;
+
+  ctx.fillRect(
+    900,
+    500,
+    700,
+    500
+  );
+
+
+  // ========================================================
+  // HEADER
+  // ========================================================
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "900 58px Arial";
+
+  ctx.fillText(
+    "SOT SCOREBOARD",
+    90,
+    105
+  );
+
+  ctx.fillStyle =
+    "#9da6b5";
+
+  ctx.font =
+    "600 24px Arial";
+
+  ctx.fillText(
+    "SATURDAY OPEN TOURNAMENT",
+    94,
+    145
+  );
+
+
+  // Final badge
+
+  ctx.fillStyle =
+    "#ff3f4f";
+
+  ctx.beginPath();
+
+  ctx.roundRect(
+    1240,
+    70,
+    270,
+    58,
+    29
+  );
+
+  ctx.fill();
+
+  ctx.fillStyle =
+    "#ffffff";
+
+  ctx.font =
+    "900 23px Arial";
+
+  ctx.fillText(
+    `🏁 FINAL — MATCH ${currentMatch}`,
+    1270,
+    107
+  );
+
+
+  // ========================================================
+  // DIVIDER
+  // ========================================================
+
+  const divider =
+    ctx.createLinearGradient(
+      90,
+      0,
+      1510,
+      0
+    );
+
+  divider.addColorStop(
+    0,
+    "#ff3f4f"
+  );
+
+  divider.addColorStop(
+    0.5,
+    "#ff9d3d"
+  );
+
+  divider.addColorStop(
+    1,
+    "rgba(255,255,255,0)"
+  );
+
+  ctx.fillStyle =
+    divider;
+
+  ctx.fillRect(
+    90,
+    180,
+    1420,
+    3
+  );
+
+
+  // ========================================================
+  // TABLE HEADER
+  // ========================================================
+
+  ctx.fillStyle =
+    "rgba(255,255,255,0.08)";
+
+  ctx.fillRect(
+    90,
+    220,
+    1420,
+    55
+  );
+
+  ctx.fillStyle =
+    "#aeb6c4";
+
+  ctx.font =
+    "800 18px Arial";
+
+  ctx.fillText(
+    "RANK",
+    120,
+    255
+  );
+
+  ctx.fillText(
+    "PLAYER",
+    260,
+    255
+  );
+
+  ctx.fillText(
+    "WIN",
+    800,
+    255
+  );
+
+  ctx.fillText(
+    "MVP",
+    900,
+    255
+  );
+
+  ctx.fillText(
+    "QUADRA",
+    1000,
+    255
+  );
+
+  ctx.fillText(
+    "PENTA",
+    1120,
+    255
+  );
+
+  ctx.fillText(
+    "SCORE",
+    1360,
+    255
+  );
+
+
+  // ========================================================
+  // PLAYER ROWS
+  // ========================================================
+
+  const maxRows = 10;
+
+  sortedPlayers
+    .slice(0, maxRows)
+    .forEach(
+      (player, index) => {
+
+        const y =
+          275 + index * 62;
+
+        if (index % 2 === 0) {
+
+          ctx.fillStyle =
+            "rgba(255,255,255,0.025)";
+
+          ctx.fillRect(
+            90,
+            y,
+            1420,
+            62
+          );
+        }
+
+
+        // Rank
+
+        ctx.fillStyle =
+          index === 0
+            ? "#ff9d3d"
+            : "#dfe3ea";
+
+        ctx.font =
+          "900 23px Arial";
+
+        ctx.fillText(
+          String(index + 1),
+          125,
+          y + 40
+        );
+
+
+        // Name
+
+        ctx.fillStyle =
+          "#ffffff";
+
+        ctx.font =
+          "800 21px Arial";
+
+        ctx.fillText(
+          String(player.name).slice(0, 28),
+          260,
+          y + 40
+        );
+
+
+        // Achievements
+
+        ctx.fillStyle =
+          "#cbd1da";
+
+        ctx.font =
+          "700 19px Arial";
+
+        ctx.fillText(
+          player.win || 0,
+          810,
+          y + 40
+        );
+
+        ctx.fillText(
+          player.mvp || 0,
+          910,
+          y + 40
+        );
+
+        ctx.fillText(
+          player.quadra || 0,
+          1020,
+          y + 40
+        );
+
+        ctx.fillText(
+          player.penta || 0,
+          1135,
+          y + 40
+        );
+
+
+        // Score
+
+        ctx.fillStyle =
+          "#ffc067";
+
+        ctx.font =
+          "900 24px Arial";
+
+        ctx.fillText(
+          String(player.score),
+          1365,
+          y + 40
+        );
+      }
+    );
+
+
+  // ========================================================
+  // FOOTER
+  // ========================================================
+
+  ctx.fillStyle =
+    "#737c8b";
+
+  ctx.font =
+    "600 17px Arial";
+
+  ctx.fillText(
+    "SOT Scoreboard • Saturday Open Tournament",
+    90,
+    940
+  );
+
+
+  // ========================================================
+  // PREVIEW
+  // ========================================================
+
+  const image =
+    canvas.toDataURL(
+      "image/png"
+    );
+
+  const preview =
+    document.getElementById(
+      "resultPreview"
+    );
+
+  const imageElement =
+    document.getElementById(
+      "resultImage"
+    );
+
+  if (imageElement) {
+    imageElement.src =
+      image;
+  }
+
+  if (preview) {
+    preview.style.display =
+      "block";
+  }
+
+
+  // ========================================================
+  // DOWNLOAD
+  // ========================================================
+
+  const link =
+    document.createElement("a");
+
+  link.download =
+    `SOT-Final-Match-${currentMatch}.png`;
+
+  link.href =
+    image;
+
+  link.click();
+}
+
+
+// ============================================================
+// RESULT BUTTON
+// ============================================================
+
+document
+  .getElementById(
+    "generateResultBtn"
+  )
+  ?.addEventListener(
+    "click",
+    generateResultImage
+  );
+
+
+// ============================================================
+// UPDATE MAIN RENDER
+// ============================================================
+
+const originalRender =
+  render;
+
+render = function() {
+
+  originalRender();
+
+  updateResultUI();
+};
