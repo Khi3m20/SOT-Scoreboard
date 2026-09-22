@@ -43,10 +43,131 @@
 
     </div>
 
+
+    <!-- AUTH -->
+
+    <div class="auth-area">
+
+      <span
+        id="authStatus"
+        class="auth-status"
+      >
+        VIEWER
+      </span>
+
+      <button
+        id="loginBtn"
+        class="primary-btn"
+        type="button"
+      >
+        ADMIN LOGIN
+      </button>
+
+      <button
+        id="logoutBtn"
+        class="action-btn"
+        type="button"
+        style="display:none;"
+      >
+        LOGOUT
+      </button>
+
+    </div>
+
   </header>
 
 
   <main class="container">
+
+
+    <!-- =========================
+         LOGIN PANEL
+    ========================== -->
+
+    <section
+      id="loginPanel"
+      class="panel login-panel"
+      style="display:none;"
+    >
+
+      <div class="panel-title">
+
+        <div>
+
+          <h2>Admin Login</h2>
+
+          <span>
+            Authorized tournament administrators only
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <form id="loginForm">
+
+        <div class="form-grid">
+
+          <div class="field">
+
+            <label>
+              ADMIN USERNAME
+            </label>
+
+            <input
+              id="loginUsername"
+              type="text"
+              autocomplete="username"
+              placeholder="Enter username"
+              required
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>
+              ADMIN PASSWORD
+            </label>
+
+            <input
+              id="loginPassword"
+              type="password"
+              autocomplete="current-password"
+              placeholder="Enter password"
+              required
+            >
+
+          </div>
+
+
+          <div class="field button-field">
+
+            <label>&nbsp;</label>
+
+            <button
+              class="primary-btn"
+              type="submit"
+            >
+              LOGIN
+            </button>
+
+          </div>
+
+        </div>
+
+      </form>
+
+
+      <p
+        id="loginMessage"
+        class="login-message"
+        style="display:none;"
+      ></p>
+
+    </section>
 
 
     <!-- =========================
@@ -90,228 +211,225 @@
     </section>
 
 
-
     <!-- =========================
-         ADD PLAYER
+         ADMIN CONTROLS
+         HIDDEN FROM VIEWERS
     ========================== -->
 
-    <section class="panel">
+    <div
+      id="adminControls"
+      style="display:none;"
+    >
 
-      <div class="panel-title">
 
-        <div>
+      <!-- =========================
+           ADD PLAYER
+      ========================== -->
 
-          <h2>Add Player</h2>
+      <section class="panel">
 
-          <span>
-            Add a player to the SOT leaderboard
-          </span>
+        <div class="panel-title">
+
+          <div>
+
+            <h2>Add Player</h2>
+
+            <span>
+              Add a player to the SOT leaderboard
+            </span>
+
+          </div>
 
         </div>
 
-      </div>
+
+        <form id="playerForm">
+
+          <div class="form-grid">
+
+            <div class="field">
+
+              <label>
+                PLAYER NAME
+              </label>
+
+              <input
+                id="playerName"
+                type="text"
+                placeholder="Enter player name"
+                required
+              >
+
+            </div>
 
 
-      <form id="playerForm">
+            <div class="field button-field">
 
-        <div class="form-grid">
+              <label>&nbsp;</label>
+
+              <button
+                class="primary-btn"
+                type="submit"
+              >
+                ADD PLAYER
+              </button>
+
+            </div>
+
+          </div>
+
+        </form>
+
+      </section>
+
+
+      <!-- =========================
+           SCORING SETTINGS
+      ========================== -->
+
+      <section class="panel">
+
+        <div class="panel-title">
+
+          <div>
+
+            <h2>SOT Scoring Settings</h2>
+
+            <span>
+              Adjust points for each achievement
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div class="form-grid scoring-grid">
+
 
           <div class="field">
 
-            <label>
-              PLAYER NAME
-            </label>
+            <label>WIN POINTS</label>
 
             <input
-              id="playerName"
-              type="text"
-              placeholder="Enter player name"
-              required
+              id="winPoints"
+              type="number"
+              step="0.1"
+              value="10"
+              min="0"
             >
 
           </div>
 
 
-          <div class="field button-field">
+          <div class="field">
 
-            <label>&nbsp;</label>
+            <label>MVP POINTS</label>
 
-            <button
-              class="primary-btn"
-              type="submit"
+            <input
+              id="mvpPoints"
+              type="number"
+              step="0.1"
+              value="5"
+              min="0"
             >
-              ADD PLAYER
-            </button>
+
+          </div>
+
+
+          <div class="field">
+
+            <label>QUADRA POINTS</label>
+
+            <input
+              id="quadraPoints"
+              type="number"
+              step="0.1"
+              value="8"
+              min="0"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PENTA POINTS</label>
+
+            <input
+              id="pentaPoints"
+              type="number"
+              step="0.1"
+              value="12"
+              min="0"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PPCC ×5 POINTS</label>
+
+            <input
+              id="ppccPoints"
+              type="number"
+              step="0.1"
+              value="5"
+              min="0"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PERFECT TANK 100%</label>
+
+            <input
+              id="tankPoints"
+              type="number"
+              step="0.1"
+              value="1"
+              min="0"
+            >
+
+          </div>
+
+
+          <div class="field">
+
+            <label>PERFECT DPS 100%</label>
+
+            <input
+              id="dpsPoints"
+              type="number"
+              step="0.1"
+              value="1"
+              min="0"
+            >
 
           </div>
 
         </div>
 
-      </form>
 
-    </section>
+        <button
+          class="primary-btn"
+          id="applyScoring"
+          type="button"
+        >
+          APPLY SCORING
+        </button>
 
+      </section>
 
-
-    <!-- =========================
-         SCORING SETTINGS
-    ========================== -->
-
-    <section class="panel">
-
-      <div class="panel-title">
-
-        <div>
-
-          <h2>SOT Scoring Settings</h2>
-
-          <span>
-            Adjust points for each achievement
-          </span>
-
-        </div>
-
-      </div>
-
-
-      <div class="form-grid scoring-grid">
-
-
-        <div class="field">
-
-          <label>
-            WIN POINTS
-          </label>
-
-          <input
-            id="winPoints"
-            type="number"
-            step="0.1"
-            value="10"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            MVP POINTS
-          </label>
-
-          <input
-            id="mvpPoints"
-            type="number"
-            step="0.1"
-            value="5"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            QUADRA POINTS
-          </label>
-
-          <input
-            id="quadraPoints"
-            type="number"
-            step="0.1"
-            value="8"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            PENTA POINTS
-          </label>
-
-          <input
-            id="pentaPoints"
-            type="number"
-            step="0.1"
-            value="12"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            PPCC ×5 POINTS
-          </label>
-
-          <input
-            id="ppccPoints"
-            type="number"
-            step="0.1"
-            value="5"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            PERFECT TANK 100%
-          </label>
-
-          <input
-            id="tankPoints"
-            type="number"
-            step="0.1"
-            value="1"
-            min="0"
-          >
-
-        </div>
-
-
-        <div class="field">
-
-          <label>
-            PERFECT DPS 100%
-          </label>
-
-          <input
-            id="dpsPoints"
-            type="number"
-            step="0.1"
-            value="1"
-            min="0"
-          >
-
-        </div>
-
-      </div>
-
-
-      <button
-        class="primary-btn"
-        id="applyScoring"
-        type="button"
-      >
-        APPLY SCORING
-      </button>
-
-    </section>
-
+    </div>
 
 
     <!-- =========================
          LEADERBOARD
+         EVERYONE CAN VIEW
     ========================== -->
 
     <section class="panel">
@@ -348,25 +466,15 @@
             <tr>
 
               <th>RANK</th>
-
               <th>PLAYER</th>
-
               <th>WIN</th>
-
               <th>MVP</th>
-
               <th>QUADRA</th>
-
               <th>PENTA</th>
-
               <th>PPCC ×5</th>
-
               <th>TANK 100%</th>
-
               <th>DPS 100%</th>
-
               <th>SOT SCORE</th>
-
               <th>ACTION</th>
 
             </tr>
@@ -390,7 +498,6 @@
       </div>
 
     </section>
-
 
 
     <!-- =========================
@@ -432,14 +539,13 @@
 
       <p>
         Player data and scoring settings are
-        saved locally in this browser.
+        currently saved locally in this browser.
       </p>
 
     </section>
 
 
   </main>
-
 
 
   <!-- =========================
