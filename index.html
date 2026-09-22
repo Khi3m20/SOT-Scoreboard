@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HoK Tournament Score</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+  <header class="topbar">
+    <div>
+      <div class="logo">HoK <span>SCORE</span></div>
+      <div class="subtitle">Saturday Open Tournament</div>
+    </div>
+    <div class="status">● LIVE TRACKER</div>
+  </header>
+
+  <main class="container">
+
+    <!-- STATS -->
+    <section class="stats">
+      <div class="stat-card">
+        <span>PLAYERS</span>
+        <strong id="totalPlayers">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>TOP SCORE</span>
+        <strong id="topScore">0</strong>
+      </div>
+
+      <div class="stat-card">
+        <span>LEADER</span>
+        <strong id="leaderName">—</strong>
+      </div>
+    </section>
+
+    <!-- ADD PLAYER -->
+    <section class="panel">
+      <div class="panel-title">
+        <h2>Add Player</h2>
+        <span>Score Entry</span>
+      </div>
+
+      <form id="playerForm">
+
+        <div class="form-grid">
+
+          <div class="field player-field">
+            <label>PLAYER</label>
+            <input
+              id="playerName"
+              type="text"
+              placeholder="Enter player name"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label>KILLS</label>
+            <input id="kills" type="number" min="0" value="0">
+          </div>
+
+          <div class="field">
+            <label>DEATHS</label>
+            <input id="deaths" type="number" min="0" value="0">
+          </div>
+
+          <div class="field">
+            <label>ASSISTS</label>
+            <input id="assists" type="number" min="0" value="0">
+          </div>
+
+        </div>
+
+        <button class="primary-btn" type="submit">
+          + ADD PLAYER
+        </button>
+
+      </form>
+    </section>
+
+    <!-- LEADERBOARD -->
+    <section class="panel">
+
+      <div class="leaderboard-header">
+        <div>
+          <h2>Leaderboard</h2>
+          <span>Highest score first</span>
+        </div>
+
+        <input
+          id="search"
+          class="search"
+          type="text"
+          placeholder="Search player..."
+        >
+      </div>
+
+      <div class="table-wrap">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>RANK</th>
+              <th>PLAYER</th>
+              <th>K</th>
+              <th>D</th>
+              <th>A</th>
+              <th>POINTS</th>
+              <th></th>
+            </tr>
+          </thead>
+
+          <tbody id="leaderboard">
+          </tbody>
+
+        </table>
+
+        <div id="emptyState" class="empty">
+          No players added yet.
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- RULES -->
+    <section class="rules">
+
+      <div>
+        <strong>SCORING</strong>
+        <span>Kills × 3 + Assists × 1 − Deaths × 2</span>
+      </div>
+
+      <div>
+        <strong>DATA</strong>
+        <span>Saved locally in your browser</span>
+      </div>
+
+    </section>
+
+  </main>
+
+  <footer>
+    HoK Saturday Open Tournament · Score Tracker
+  </footer>
+
+  <script src="script.js"></script>
+
+</body>
+</html>
