@@ -23,64 +23,80 @@ body {
   min-height: 100vh;
 }
 
-/* HEADER */
+
+/* =========================
+   HEADER
+========================= */
 
 .topbar {
-  min-height: 78px;
+  width: 100%;
   border-bottom: 1px solid var(--border);
-  background: #090f1d;
+  background: rgba(8, 13, 24, 0.95);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
 
+.brand {
+  max-width: 1400px;
+  margin: auto;
+  padding: 20px 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-
-  padding: 0 6%;
+  gap: 14px;
 }
 
 .logo {
-  font-size: 25px;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   font-weight: 900;
+  font-size: 15px;
+  box-shadow: 0 0 25px rgba(118, 92, 255, 0.25);
+}
+
+.brand h1 {
+  font-size: 22px;
   letter-spacing: 1px;
 }
 
-.logo span {
-  color: var(--accent2);
-}
-
-.subtitle {
+.brand span {
   color: var(--muted);
-  font-size: 12px;
-  margin-top: 3px;
+  font-size: 13px;
 }
 
-.status {
-  color: var(--accent2);
-  font-size: 11px;
-  font-weight: bold;
-  letter-spacing: 1px;
-}
 
-/* MAIN */
+/* =========================
+   MAIN CONTAINER
+========================= */
 
 .container {
-  width: min(1100px, 92%);
-  margin: 35px auto;
+  max-width: 1400px;
+  margin: auto;
+  padding: 30px 24px 50px;
 }
 
-/* STATS */
 
-.stats {
+/* =========================
+   STATS
+========================= */
+
+.stats-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 15px;
-  margin-bottom: 20px;
+  gap: 18px;
+  margin-bottom: 24px;
 }
 
 .stat-card {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
+  border-radius: 16px;
+  padding: 22px;
 }
 
 .stat-card span {
@@ -89,181 +105,329 @@ body {
   font-size: 11px;
   font-weight: bold;
   letter-spacing: 1px;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
 }
 
 .stat-card strong {
-  display: block;
-  font-size: 26px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 28px;
 }
 
-/* PANEL */
+
+/* =========================
+   PANELS
+========================= */
 
 .panel {
   background: var(--panel);
   border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
-  margin-bottom: 20px;
+  border-radius: 16px;
+  padding: 22px;
+  margin-bottom: 22px;
 }
 
 .panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
   margin-bottom: 20px;
 }
 
-h2 {
+.panel-title h2 {
   font-size: 18px;
+  margin-bottom: 5px;
 }
 
-.panel-title span,
-.leaderboard-header span {
+.panel-title span {
   color: var(--muted);
-  font-size: 12px;
+  font-size: 13px;
 }
 
-/* FORM */
+
+/* =========================
+   FORM
+========================= */
 
 .form-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
 }
-
-.field label {
-  display: block;
-  color: var(--muted);
-  font-size: 10px;
-  font-weight: bold;
-  margin-bottom: 7px;
-  letter-spacing: 1px;
-}
-
-input {
-  width: 100%;
-  background: var(--panel2);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: 8px;
-  padding: 12px;
-  outline: none;
-}
-
-input:focus {
-  border-color: var(--accent);
-}
-
-.primary-btn {
-  margin-top: 16px;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 12px 20px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: 0.15s;
-}
-
-.primary-btn:hover {
-  background: var(--accent2);
-}
-
-/* LEADERBOARD */
-
-.leaderboard-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.search {
-  width: 190px;
-}
-
-/* TABLE */
-
-.table-wrap {
-  overflow-x: auto;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-thead {
-  background: #0b1221;
-}
-
-th {
-  color: var(--muted);
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-align: left;
-  padding: 13px;
-}
-
-td {
-  padding: 14px 13px;
-  border-top: 1px solid var(--border);
-  font-size: 14px;
-}
-
-tr:hover td {
-  background: #111a2d;
-}
-
-.rank {
-  font-weight: 900;
-  color: var(--accent2);
-}
-
-.player-name {
-  font-weight: bold;
-}
-
-.points {
-  font-weight: 900;
-  color: #a696ff;
-}
-
-.action-btn {
-  border: 1px solid var(--border);
-  background: transparent;
-  color: var(--muted);
-  border-radius: 6px;
-  padding: 6px 8px;
-  cursor: pointer;
-  margin-left: 4px;
-}
-
-.action
-/* =========================
-   SOT SCORING SETTINGS
-========================= */
 
 .scoring-grid {
   grid-template-columns: repeat(4, 1fr);
 }
 
-#scorePreview {
-  color: var(--accent2);
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field label {
+  color: var(--muted);
+  font-size: 10px;
   font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.field input {
+  width: 100%;
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 12px 13px;
+  outline: none;
+  font-size: 14px;
+}
+
+.field input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(118, 92, 255, 0.12);
+}
+
+.button-field {
+  min-width: 140px;
 }
 
 
 /* =========================
-   MOBILE SCORING
+   BUTTONS
 ========================= */
+
+.primary-btn {
+  border: none;
+  border-radius: 9px;
+  background: var(--accent);
+  color: white;
+  font-weight: bold;
+  padding: 12px 18px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.primary-btn:hover {
+  background: var(--accent2);
+  transform: translateY(-1px);
+}
+
+.action-btn {
+  border: 1px solid var(--border);
+  background: var(--panel2);
+  color: var(--text);
+  border-radius: 7px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.action-btn:hover {
+  border-color: var(--accent);
+}
+
+.action-btn.delete {
+  color: var(--danger);
+  margin-left: 5px;
+}
+
+
+/* =========================
+   SEARCH
+========================= */
+
+.search {
+  width: 220px;
+  background: var(--panel2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  padding: 10px 12px;
+  outline: none;
+}
+
+.search:focus {
+  border-color: var(--accent);
+}
+
+
+/* =========================
+   TABLE
+========================= */
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+}
+
+thead {
+  background: var(--panel2);
+}
+
+th {
+  color: var(--muted);
+  font-size: 10px;
+  letter-spacing: 0.8px;
+  padding: 13px 10px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+td {
+  padding: 14px 10px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+td.player-name {
+  text-align: left;
+  font-weight: bold;
+}
+
+td.rank {
+  color: var(--accent2);
+  font-weight: bold;
+}
+
+td.points {
+  color: var(--accent2);
+  font-weight: 900;
+  font-size: 15px;
+}
+
+
+/* =========================
+   EMPTY STATE
+========================= */
+
+.empty-state {
+  text-align: center;
+  color: var(--muted);
+  padding: 35px 10px 10px;
+}
+
+
+/* =========================
+   RULES
+========================= */
+
+.rules p {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.7;
+  margin-bottom: 10px;
+}
+
+.rules p:last-child {
+  margin-bottom: 0;
+}
+
+.rules strong {
+  color: var(--text);
+}
+
+
+/* =========================
+   FOOTER
+========================= */
+
+footer {
+  border-top: 1px solid var(--border);
+  padding: 22px 24px;
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 900px) {
+
+  .scoring-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+}
+
 
 @media (max-width: 700px) {
 
+  .container {
+    padding: 20px 14px 40px;
+  }
+
+  .brand {
+    padding: 16px;
+  }
+
+  .brand h1 {
+    font-size: 18px;
+  }
+
+  .logo {
+    width: 42px;
+    height: 42px;
+  }
+
+  .panel {
+    padding: 16px;
+    border-radius: 13px;
+  }
+
+  .panel-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .search {
+    width: 100%;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
   .scoring-grid {
     grid-template-columns: 1fr 1fr;
+  }
+
+  .button-field {
+    min-width: 0;
+  }
+
+  .primary-btn {
+    width: 100%;
+  }
+
+  footer {
+    flex-direction: column;
+    text-align: center;
+  }
+
+}
+
+
+@media (max-width: 430px) {
+
+  .scoring-grid {
+    grid-template-columns: 1fr;
   }
 
 }
