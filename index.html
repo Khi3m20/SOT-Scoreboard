@@ -140,7 +140,68 @@
 
     </section>
 
+<section class="panel">
 
+  <div class="panel-title">
+    <div>
+      <h2>SOT Scoring Settings</h2>
+      <span>Adjust points for each statistic</span>
+    </div>
+  </div>
+
+  <div class="form-grid scoring-grid">
+
+    <div class="field">
+      <label>KILL POINTS</label>
+      <input
+        id="killPoints"
+        type="number"
+        step="0.1"
+        value="3"
+      >
+    </div>
+
+    <div class="field">
+      <label>DEATH POINTS</label>
+      <input
+        id="deathPoints"
+        type="number"
+        step="0.1"
+        value="2"
+      >
+    </div>
+
+    <div class="field">
+      <label>ASSIST POINTS</label>
+      <input
+        id="assistPoints"
+        type="number"
+        step="0.1"
+        value="1"
+      >
+    </div>
+
+    <div class="field">
+      <label>PREVIEW</label>
+      <input
+        id="scorePreview"
+        type="text"
+        value="K × 3 + A × 1 − D × 2"
+        readonly
+      >
+    </div>
+
+  </div>
+
+  <button
+    class="primary-btn"
+    id="applyScoring"
+    type="button"
+  >
+    APPLY SCORING
+  </button>
+
+</section>
     <!-- LEADERBOARD -->
     <section class="panel">
 
