@@ -1,6 +1,8 @@
 // =====================================================
 // SOT SCOREBOARD
 // SECTION 1A — LOGIN / ADMIN PERMISSIONS
+// SECTION 2 — PLAYER ACHIEVEMENTS + / -
+// STORAGE LAYER — LOCAL READY / DATABASE READY
 // =====================================================
 
 
@@ -8,51 +10,19 @@
 // AUTH ELEMENTS
 // =====================================================
 
-const loginBtn =
-  document.getElementById("loginBtn");
-
-const logoutBtn =
-  document.getElementById("logoutBtn");
-
-const loginPanel =
-  document.getElementById("loginPanel");
-
-const loginForm =
-  document.getElementById("loginForm");
-
-const loginUsername =
-  document.getElementById("loginUsername");
-
-const loginPassword =
-  document.getElementById("loginPassword");
-
-const loginMessage =
-  document.getElementById("loginMessage");
-
-const authStatus =
-  document.getElementById("authStatus");
-
-const adminControls =
-  document.getElementById("adminControls");
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const loginPanel = document.getElementById("loginPanel");
+const loginForm = document.getElementById("loginForm");
+const loginUsername = document.getElementById("loginUsername");
+const loginPassword = document.getElementById("loginPassword");
+const loginMessage = document.getElementById("loginMessage");
+const authStatus = document.getElementById("authStatus");
+const adminControls = document.getElementById("adminControls");
 
 
 // =====================================================
 // PROTOTYPE ADMIN ACCOUNTS
-// =====================================================
-//
-// TEMPORARY ONLY.
-//
-// These will be replaced by Supabase Auth
-// in Section 1B.
-//
-// Demo accounts:
-//
-// Username: admin
-// Password: sotdemo
-//
-// Username: jk
-// Password: sotdemo
-//
 // =====================================================
 
 const PROTOTYPE_ADMINS = [
@@ -60,7 +30,6 @@ const PROTOTYPE_ADMINS = [
     username: "admin",
     password: "sotdemo"
   },
-
   {
     username: "jk",
     password: "sotdemo"
@@ -73,9 +42,205 @@ const PROTOTYPE_ADMINS = [
 // =====================================================
 
 let isAdmin =
-  localStorage.getItem(
-    "sotAdminLoggedIn"
-  ) === "true";
+  localStorage.getItem("sotAdminLoggedIn") === "true";
+
+
+// =====================================================
+// STORAGE CONFIG
+// =====================================================
+//
+// IMPORTANT:
+// All player/scoring storage goes through this section.
+//
+// CURRENT:
+// LOCAL STORAGE
+//
+// FUTURE:
+// SUPABASE DATABASE
+//
+// Do NOT put localStorage.setItem/getItem elsewhere.
+// =====================================================
+
+const STORAGE_MODE = "local";
+
+
+// =====================================================
+// STORAGE LAYER
+// =====================================================
+
+const Storage = {
+
+  // -----------------------------------------------
+  // PLAYERS
+  // -----------------------------------------------
+
+  loadPlayers() {
+
+    if (STORAGE_MODE === "local") {
+
+      return JSON.parse(
+        localStorage.getItem("sotPlayers")
+      ) || [];
+
+    }
+
+    // Future:
+    // return await Database.loadPlayers();
+
+    return [];
+
+  },
+
+
+  savePlayers(data) {
+
+    if (STORAGE_MODE === "local") {
+
+      localStorage.setItem(
+        "sotPlayers",
+        JSON.stringify(data)
+      );
+
+      return;
+
+    }
+
+    // Future:
+    // await Database.savePlayers(data);
+
+  },
+
+
+  // -----------------------------------------------
+  // SCORING
+  // -----------------------------------------------
+
+  loadScoring() {
+
+    if (STORAGE_MODE === "local") {
+
+      return JSON.parse(
+        localStorage.getItem("sotScoring")
+      ) || {
+
+        win: 10,
+        mvp: 5,
+        quadra: 8,
+        penta: 12,
+        ppcc: 5,
+        tank: 1,
+        dps: 1
+
+      };
+
+    }
+
+    // Future:
+    // return await Database.loadScoring();
+
+    return {
+
+      win: 10,
+      mvp: 5,
+      quadra: 8,
+      penta: 12,
+      ppcc: 5,
+      tank: 1,
+      dps: 1
+
+    };
+
+  },
+
+
+  saveScoring(data) {
+
+    if (STORAGE_MODE === "local") {
+
+      localStorage.setItem(
+        "sotScoring",
+        JSON.stringify(data)
+      );
+
+      return;
+
+    }
+
+    // Future:
+    // await Database.saveScoring(data);
+
+  }
+
+};
+
+
+// =====================================================
+// LOAD DATA THROUGH STORAGE LAYER
+// =====================================================
+
+let players =
+  Storage.loadPlayers();
+
+let scoring =
+  Storage.loadScoring();
+
+
+// =====================================================
+// SCOREBOARD ELEMENTS
+// =====================================================
+
+const form =
+  document.getElementById("playerForm");
+
+const playerName =
+  document.getElementById("playerName");
+
+const leaderboard =
+  document.getElementById("leaderboard");
+
+const emptyState =
+  document.getElementById("emptyState");
+
+const search =
+  document.getElementById("search");
+
+const totalPlayers =
+  document.getElementById("totalPlayers");
+
+const topScore =
+  document.getElementById("topScore");
+
+const leaderName =
+  document.getElementById("leaderName");
+
+
+// =====================================================
+// SCORING ELEMENTS
+// =====================================================
+
+const winPoints =
+  document.getElementById("winPoints");
+
+const mvpPoints =
+  document.getElementById("mvpPoints");
+
+const quadraPoints =
+  document.getElementById("quadraPoints");
+
+const pentaPoints =
+  document.getElementById("pentaPoints");
+
+const ppccPoints =
+  document.getElementById("ppccPoints");
+
+const tankPoints =
+  document.getElementById("tankPoints");
+
+const dpsPoints =
+  document.getElementById("dpsPoints");
+
+const applyScoring =
+  document.getElementById("applyScoring");
 
 
 // =====================================================
@@ -85,10 +250,6 @@ let isAdmin =
 function updateAuthUI() {
 
   if (isAdmin) {
-
-    // -----------------------------------------------
-    // ADMIN VIEW
-    // -----------------------------------------------
 
     if (authStatus) {
       authStatus.textContent = "ADMIN";
@@ -106,19 +267,7 @@ function updateAuthUI() {
       adminControls.style.display = "block";
     }
 
-    // Show action buttons inside leaderboard
-
-    document
-      .querySelectorAll(".admin-action")
-      .forEach(button => {
-        button.style.display = "inline-block";
-      });
-
   } else {
-
-    // -----------------------------------------------
-    // VIEWER VIEW
-    // -----------------------------------------------
 
     if (authStatus) {
       authStatus.textContent = "VIEWER";
@@ -136,22 +285,15 @@ function updateAuthUI() {
       adminControls.style.display = "none";
     }
 
-    // Hide action buttons
-
-    document
-      .querySelectorAll(".admin-action")
-      .forEach(button => {
-        button.style.display = "none";
-      });
-
   }
 
   render();
+
 }
 
 
 // =====================================================
-// OPEN LOGIN PANEL
+// OPEN LOGIN
 // =====================================================
 
 if (loginBtn) {
@@ -190,7 +332,6 @@ if (loginForm) {
 
       event.preventDefault();
 
-
       const username =
         loginUsername.value
           .trim()
@@ -199,18 +340,12 @@ if (loginForm) {
       const password =
         loginPassword.value;
 
-
       const validAdmin =
         PROTOTYPE_ADMINS.find(
           admin =>
             admin.username === username &&
             admin.password === password
         );
-
-
-      // -----------------------------------------------
-      // INVALID LOGIN
-      // -----------------------------------------------
 
       if (!validAdmin) {
 
@@ -228,43 +363,23 @@ if (loginForm) {
         }
 
         return;
+
       }
 
-
-      // -----------------------------------------------
-      // SUCCESS
-      // -----------------------------------------------
-
       isAdmin = true;
-
 
       localStorage.setItem(
         "sotAdminLoggedIn",
         "true"
       );
 
-
-      if (loginMessage) {
-
-        loginMessage.textContent =
-          "Login successful.";
-
-        loginMessage.className =
-          "login-message success";
-
-        loginMessage.style.display =
-          "block";
-
+      if (loginForm) {
+        loginForm.reset();
       }
-
-
-      loginForm.reset();
-
 
       if (loginPanel) {
         loginPanel.style.display = "none";
       }
-
 
       updateAuthUI();
 
@@ -286,21 +401,17 @@ if (logoutBtn) {
 
       isAdmin = false;
 
-
       localStorage.removeItem(
         "sotAdminLoggedIn"
       );
-
 
       if (loginPanel) {
         loginPanel.style.display = "none";
       }
 
-
       if (loginForm) {
         loginForm.reset();
       }
-
 
       updateAuthUI();
 
@@ -311,162 +422,56 @@ if (logoutBtn) {
 
 
 // =====================================================
-// SCOREBOARD ELEMENTS
-// =====================================================
-
-const form =
-  document.getElementById("playerForm");
-
-const playerName =
-  document.getElementById("playerName");
-
-const leaderboard =
-  document.getElementById("leaderboard");
-
-const emptyState =
-  document.getElementById("emptyState");
-
-const search =
-  document.getElementById("search");
-
-const totalPlayers =
-  document.getElementById("totalPlayers");
-
-const topScore =
-  document.getElementById("topScore");
-
-const leaderName =
-  document.getElementById("leaderName");
-
-
-// =====================================================
-// SCORING SETTINGS
-// =====================================================
-
-const winPoints =
-  document.getElementById("winPoints");
-
-const mvpPoints =
-  document.getElementById("mvpPoints");
-
-const quadraPoints =
-  document.getElementById("quadraPoints");
-
-const pentaPoints =
-  document.getElementById("pentaPoints");
-
-const ppccPoints =
-  document.getElementById("ppccPoints");
-
-const tankPoints =
-  document.getElementById("tankPoints");
-
-const dpsPoints =
-  document.getElementById("dpsPoints");
-
-const applyScoring =
-  document.getElementById("applyScoring");
-
-
-// =====================================================
-// LOAD PLAYERS
-// =====================================================
-
-let players =
-  JSON.parse(
-    localStorage.getItem(
-      "sotPlayers"
-    )
-  ) || [];
-
-
-// =====================================================
-// LOAD SCORING
-// =====================================================
-
-let scoring =
-  JSON.parse(
-    localStorage.getItem(
-      "sotScoring"
-    )
-  ) || {
-
-    win: 10,
-    mvp: 5,
-    quadra: 8,
-    penta: 12,
-    ppcc: 5,
-    tank: 1,
-    dps: 1
-
-  };
-
-
-// =====================================================
 // LOAD SCORING INTO INPUTS
 // =====================================================
 
 function loadScoringSettings() {
 
   if (winPoints)
-    winPoints.value =
-      scoring.win;
+    winPoints.value = scoring.win;
 
   if (mvpPoints)
-    mvpPoints.value =
-      scoring.mvp;
+    mvpPoints.value = scoring.mvp;
 
   if (quadraPoints)
-    quadraPoints.value =
-      scoring.quadra;
+    quadraPoints.value = scoring.quadra;
 
   if (pentaPoints)
-    pentaPoints.value =
-      scoring.penta;
+    pentaPoints.value = scoring.penta;
 
   if (ppccPoints)
-    ppccPoints.value =
-      scoring.ppcc;
+    ppccPoints.value = scoring.ppcc;
 
   if (tankPoints)
-    tankPoints.value =
-      scoring.tank;
+    tankPoints.value = scoring.tank;
 
   if (dpsPoints)
-    dpsPoints.value =
-      scoring.dps;
+    dpsPoints.value = scoring.dps;
 
 }
 
 
 // =====================================================
-// CALCULATE SOT SCORE
+// CALCULATE SCORE
 // =====================================================
 
 function calculateSOTScore(player) {
 
   return (
 
-    (player.win *
-      scoring.win) +
+    (player.win * scoring.win) +
 
-    (player.mvp *
-      scoring.mvp) +
+    (player.mvp * scoring.mvp) +
 
-    (player.quadra *
-      scoring.quadra) +
+    (player.quadra * scoring.quadra) +
 
-    (player.penta *
-      scoring.penta) +
+    (player.penta * scoring.penta) +
 
-    (player.ppcc *
-      scoring.ppcc) +
+    (player.ppcc * scoring.ppcc) +
 
-    (player.tank *
-      scoring.tank) +
+    (player.tank * scoring.tank) +
 
-    (player.dps *
-      scoring.dps)
+    (player.dps * scoring.dps)
 
   );
 
@@ -474,21 +479,7 @@ function calculateSOTScore(player) {
 
 
 // =====================================================
-// SAVE PLAYERS
-// =====================================================
-
-function savePlayers() {
-
-  localStorage.setItem(
-    "sotPlayers",
-    JSON.stringify(players)
-  );
-
-}
-
-
-// =====================================================
-// SAVE SCORING
+// APPLY SCORING
 // =====================================================
 
 if (applyScoring) {
@@ -497,58 +488,29 @@ if (applyScoring) {
     "click",
     function() {
 
-      // Viewer protection
-
       if (!isAdmin) {
         return;
       }
 
-
       scoring = {
 
-        win:
-          Number(
-            winPoints.value
-          ) || 0,
+        win: Number(winPoints.value) || 0,
 
-        mvp:
-          Number(
-            mvpPoints.value
-          ) || 0,
+        mvp: Number(mvpPoints.value) || 0,
 
-        quadra:
-          Number(
-            quadraPoints.value
-          ) || 0,
+        quadra: Number(quadraPoints.value) || 0,
 
-        penta:
-          Number(
-            pentaPoints.value
-          ) || 0,
+        penta: Number(pentaPoints.value) || 0,
 
-        ppcc:
-          Number(
-            ppccPoints.value
-          ) || 0,
+        ppcc: Number(ppccPoints.value) || 0,
 
-        tank:
-          Number(
-            tankPoints.value
-          ) || 0,
+        tank: Number(tankPoints.value) || 0,
 
-        dps:
-          Number(
-            dpsPoints.value
-          ) || 0
+        dps: Number(dpsPoints.value) || 0
 
       };
 
-
-      localStorage.setItem(
-        "sotScoring",
-        JSON.stringify(scoring)
-      );
-
+      Storage.saveScoring(scoring);
 
       render();
 
@@ -570,22 +532,16 @@ if (form) {
 
       event.preventDefault();
 
-
-      // Viewer protection
-
       if (!isAdmin) {
         return;
       }
 
-
       const name =
         playerName.value.trim();
-
 
       if (!name) {
         return;
       }
-
 
       players.push({
 
@@ -609,13 +565,11 @@ if (form) {
 
       });
 
-
-      savePlayers();
-
-      render();
-
+      Storage.savePlayers(players);
 
       form.reset();
+
+      render();
 
       playerName.focus();
 
@@ -626,17 +580,14 @@ if (form) {
 
 
 // =====================================================
-// EDIT PLAYER
+// EDIT PLAYER NAME
 // =====================================================
 
 function editPlayer(id) {
 
-  // Viewer protection
-
   if (!isAdmin) {
     return;
   }
-
 
   const player =
     players.find(
@@ -644,11 +595,9 @@ function editPlayer(id) {
         player.id === id
     );
 
-
   if (!player) {
     return;
   }
-
 
   const newName =
     prompt(
@@ -656,151 +605,18 @@ function editPlayer(id) {
       player.name
     );
 
-
   if (newName === null) {
     return;
   }
 
+  const trimmedName =
+    newName.trim();
 
-  const win =
-    prompt(
-      "Wins:",
-      player.win
-    );
-
-
-  if (win === null) {
-    return;
+  if (trimmedName) {
+    player.name = trimmedName;
   }
 
-
-  const mvp =
-    prompt(
-      "MVP:",
-      player.mvp
-    );
-
-
-  if (mvp === null) {
-    return;
-  }
-
-
-  const quadra =
-    prompt(
-      "Quadra Kills:",
-      player.quadra
-    );
-
-
-  if (quadra === null) {
-    return;
-  }
-
-
-  const penta =
-    prompt(
-      "Penta Kills:",
-      player.penta
-    );
-
-
-  if (penta === null) {
-    return;
-  }
-
-
-  const ppcc =
-    prompt(
-      "PPCC ×5:",
-      player.ppcc
-    );
-
-
-  if (ppcc === null) {
-    return;
-  }
-
-
-  const tank =
-    prompt(
-      "Perfect Teamfight — Tank 100%:",
-      player.tank
-    );
-
-
-  if (tank === null) {
-    return;
-  }
-
-
-  const dps =
-    prompt(
-      "Perfect Teamfight — DPS 100%:",
-      player.dps
-    );
-
-
-  if (dps === null) {
-    return;
-  }
-
-
-  player.name =
-    newName.trim() ||
-    player.name;
-
-
-  player.win =
-    Math.max(
-      0,
-      Number(win) || 0
-    );
-
-
-  player.mvp =
-    Math.max(
-      0,
-      Number(mvp) || 0
-    );
-
-
-  player.quadra =
-    Math.max(
-      0,
-      Number(quadra) || 0
-    );
-
-
-  player.penta =
-    Math.max(
-      0,
-      Number(penta) || 0
-    );
-
-
-  player.ppcc =
-    Math.max(
-      0,
-      Number(ppcc) || 0
-    );
-
-
-  player.tank =
-    Math.max(
-      0,
-      Number(tank) || 0
-    );
-
-
-  player.dps =
-    Math.max(
-      0,
-      Number(dps) || 0
-    );
-
-
-  savePlayers();
+  Storage.savePlayers(players);
 
   render();
 
@@ -813,12 +629,9 @@ function editPlayer(id) {
 
 function deletePlayer(id) {
 
-  // Viewer protection
-
   if (!isAdmin) {
     return;
   }
-
 
   if (
     !confirm(
@@ -828,17 +641,116 @@ function deletePlayer(id) {
     return;
   }
 
-
   players =
     players.filter(
       player =>
         player.id !== id
     );
 
-
-  savePlayers();
+  Storage.savePlayers(players);
 
   render();
+
+}
+
+
+// =====================================================
+// CHANGE ACHIEVEMENT
+// =====================================================
+
+function changeAchievement(
+  playerId,
+  achievement,
+  amount
+) {
+
+  if (!isAdmin) {
+    return;
+  }
+
+  const player =
+    players.find(
+      player =>
+        player.id === playerId
+    );
+
+  if (!player) {
+    return;
+  }
+
+  if (
+    typeof player[achievement] !==
+    "number"
+  ) {
+
+    player[achievement] = 0;
+
+  }
+
+  player[achievement] += amount;
+
+  if (player[achievement] < 0) {
+
+    player[achievement] = 0;
+
+  }
+
+  Storage.savePlayers(players);
+
+  render();
+
+}
+
+
+// =====================================================
+// ACHIEVEMENT CONTROL
+// =====================================================
+
+function achievementControl(
+  player,
+  achievement
+) {
+
+  const value =
+    player[achievement] || 0;
+
+  if (!isAdmin) {
+
+    return `
+      <span class="achievement-value">
+        ${value}
+      </span>
+    `;
+
+  }
+
+  return `
+
+    <div class="achievement-control">
+
+      <button
+        type="button"
+        class="achievement-btn admin-action"
+        onclick="changeAchievement(${player.id}, '${achievement}', -1)"
+      >
+        −
+      </button>
+
+      <span class="achievement-value">
+        ${value}
+      </span>
+
+      <button
+        type="button"
+        class="achievement-btn admin-action"
+        onclick="changeAchievement(${player.id}, '${achievement}', 1)"
+      >
+        +
+      </button>
+
+    </div>
+
+  `;
 
 }
 
@@ -853,7 +765,6 @@ function render() {
     return;
   }
 
-
   const query =
     search
       ? search.value
@@ -861,14 +772,12 @@ function render() {
           .trim()
       : "";
 
-
   const sorted =
     [...players].sort(
       (a, b) =>
         calculateSOTScore(b) -
         calculateSOTScore(a)
     );
-
 
   const filtered =
     sorted.filter(
@@ -878,9 +787,7 @@ function render() {
           .includes(query)
     );
 
-
   leaderboard.innerHTML = "";
-
 
   if (filtered.length === 0) {
 
@@ -896,17 +803,14 @@ function render() {
         "none";
     }
 
-
     filtered.forEach(
       (player, index) => {
 
         const score =
           calculateSOTScore(player);
 
-
         const row =
           document.createElement("tr");
-
 
         row.innerHTML = `
 
@@ -915,37 +819,56 @@ function render() {
           </td>
 
           <td class="player-name">
-            ${escapeHTML(
-              player.name
+            ${escapeHTML(player.name)}
+          </td>
+
+          <td>
+            ${achievementControl(
+              player,
+              "win"
             )}
           </td>
 
           <td>
-            ${player.win}
+            ${achievementControl(
+              player,
+              "mvp"
+            )}
           </td>
 
           <td>
-            ${player.mvp}
+            ${achievementControl(
+              player,
+              "quadra"
+            )}
           </td>
 
           <td>
-            ${player.quadra}
+            ${achievementControl(
+              player,
+              "penta"
+            )}
           </td>
 
           <td>
-            ${player.penta}
+            ${achievementControl(
+              player,
+              "ppcc"
+            )}
           </td>
 
           <td>
-            ${player.ppcc}
+            ${achievementControl(
+              player,
+              "tank"
+            )}
           </td>
 
           <td>
-            ${player.tank}
-          </td>
-
-          <td>
-            ${player.dps}
+            ${achievementControl(
+              player,
+              "dps"
+            )}
           </td>
 
           <td class="points">
@@ -955,6 +878,7 @@ function render() {
           <td>
 
             <button
+              type="button"
               class="action-btn admin-action"
               onclick="editPlayer(${player.id})"
               ${isAdmin ? "" : "style=\"display:none;\""}
@@ -962,8 +886,8 @@ function render() {
               Edit
             </button>
 
-
             <button
+              type="button"
               class="action-btn delete admin-action"
               onclick="deletePlayer(${player.id})"
               ${isAdmin ? "" : "style=\"display:none;\""}
@@ -974,7 +898,6 @@ function render() {
           </td>
 
         `;
-
 
         leaderboard.appendChild(row);
 
@@ -995,49 +918,34 @@ function render() {
 
   }
 
-
   if (sorted.length > 0) {
 
     const leader =
       sorted[0];
 
-
     const score =
-      calculateSOTScore(
-        leader
-      );
-
+      calculateSOTScore(leader);
 
     if (topScore) {
-
       topScore.textContent =
         score;
-
     }
 
-
     if (leaderName) {
-
       leaderName.textContent =
         leader.name;
-
     }
 
   } else {
 
     if (topScore) {
-
       topScore.textContent =
         "0";
-
     }
 
-
     if (leaderName) {
-
       leaderName.textContent =
         "—";
-
     }
 
   }
@@ -1066,13 +974,10 @@ if (search) {
 function escapeHTML(text) {
 
   const div =
-    document.createElement(
-      "div"
-    );
+    document.createElement("div");
 
-
-  div.textContent = text;
-
+  div.textContent =
+    text;
 
   return div.innerHTML;
 
