@@ -848,3 +848,57 @@ footer {
   }
 
 }
+/* =====================================================
+   SECTION 1A — AUTH UI
+===================================================== */
+
+.auth-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.auth-status {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+}
+
+.login-panel {
+  max-width: 100%;
+}
+
+.login-message {
+  margin-top: 14px;
+  font-weight: 700;
+}
+
+.login-message.error {
+  color: #ff6b6b;
+}
+
+.login-message.success {
+  color: #7dff9b;
+}
+
+
+/* =====================================================
+   MOBILE AUTH
+===================================================== */
+
+@media (max-width: 700px) {
+
+  .auth-area {
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+}
