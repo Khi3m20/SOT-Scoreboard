@@ -242,3 +242,28 @@ tr:hover td {
 }
 
 .action
+/* =========================
+   SOT SCORING SETTINGS
+========================= */
+
+.scoring-grid {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+#scorePreview {
+  color: var(--accent2);
+  font-weight: bold;
+}
+
+
+/* =========================
+   MOBILE SCORING
+========================= */
+
+@media (max-width: 700px) {
+
+  .scoring-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+}
