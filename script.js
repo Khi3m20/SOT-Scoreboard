@@ -1,9 +1,10 @@
+// =========================
+// SOT SCOREBOARD
+// =========================
+
 const form = document.getElementById("playerForm");
 
 const playerName = document.getElementById("playerName");
-const kills = document.getElementById("kills");
-const deaths = document.getElementById("deaths");
-const assists = document.getElementById("assists");
 
 const leaderboard = document.getElementById("leaderboard");
 const emptyState = document.getElementById("emptyState");
@@ -13,150 +14,72 @@ const totalPlayers = document.getElementById("totalPlayers");
 const topScore = document.getElementById("topScore");
 const leaderName = document.getElementById("leaderName");
 
-const killPoints = document.getElementById("killPoints");
-const deathPoints = document.getElementById("deathPoints");
-const assistPoints = document.getElementById("assistPoints");
+// Scoring settings
+const winPoints = document.getElementById("winPoints");
+const mvpPoints = document.getElementById("mvpPoints");
+const quadraPoints = document.getElementById("quadraPoints");
+const pentaPoints = document.getElementById("pentaPoints");
+const ppccPoints = document.getElementById("ppccPoints");
+const tankPoints = document.getElementById("tankPoints");
+const dpsPoints = document.getElementById("dpsPoints");
 
-const scorePreview = document.getElementById("scorePreview");
 const applyScoring = document.getElementById("applyScoring");
 
-
-/* =========================
-   PLAYER DATA
-========================= */
+// =========================
+// LOAD DATA
+// =========================
 
 let players =
   JSON.parse(localStorage.getItem("sotPlayers")) || [];
 
-
-/* =========================
-   SCORING SETTINGS
-========================= */
-
 let scoring =
   JSON.parse(localStorage.getItem("sotScoring")) || {
-
-    kill: 3,
-    death: 2,
-    assist: 1
-
+    win: 10,
+    mvp: 5,
+    quadra: 8,
+    penta: 12,
+    ppcc: 5,
+    tank: 1,
+    dps: 1
   };
 
-
-/* =========================
-   LOAD SETTINGS
-========================= */
+// =========================
+// LOAD SCORING SETTINGS
+// =========================
 
 function loadScoringSettings() {
 
-  killPoints.value =
-    scoring.kill;
-
-  deathPoints.value =
-    scoring.death;
-
-  assistPoints.value =
-    scoring.assist;
-
-  updatePreview();
+  if (winPoints) winPoints.value = scoring.win;
+  if (mvpPoints) mvpPoints.value = scoring.mvp;
+  if (quadraPoints) quadraPoints.value = scoring.quadra;
+  if (pentaPoints) pentaPoints.value = scoring.penta;
+  if (ppccPoints) ppccPoints.value = scoring.ppcc;
+  if (tankPoints) tankPoints.value = scoring.tank;
+  if (dpsPoints) dpsPoints.value = scoring.dps;
 
 }
 
+// =========================
+// CALCULATE SOT SCORE
+// =========================
 
-/* =========================
-   SCORE CALCULATOR
-========================= */
-
-function calculateSOTScore(
-  kill,
-  death,
-  assist
-) {
+function calculateSOTScore(player) {
 
   return (
-    (kill * scoring.kill) +
-    (assist * scoring.assist) -
-    (death * scoring.death)
+    (player.win * scoring.win) +
+    (player.mvp * scoring.mvp) +
+    (player.quadra * scoring.quadra) +
+    (player.penta * scoring.penta) +
+    (player.ppcc * scoring.ppcc) +
+    (player.tank * scoring.tank) +
+    (player.dps * scoring.dps)
   );
 
 }
 
-
-/* =========================
-   SCORE PREVIEW
-========================= */
-
-function updatePreview() {
-
-  const k =
-    Number(killPoints.value) || 0;
-
-  const d =
-    Number(deathPoints.value) || 0;
-
-  const a =
-    Number(assistPoints.value) || 0;
-
-
-  scorePreview.value =
-    `K × ${k} + A × ${a} − D × ${d}`;
-
-}
-
-
-killPoints.addEventListener(
-  "input",
-  updatePreview
-);
-
-deathPoints.addEventListener(
-  "input",
-  updatePreview
-);
-
-assistPoints.addEventListener(
-  "input",
-  updatePreview
-);
-
-
-/* =========================
-   APPLY SCORING
-========================= */
-
-applyScoring.addEventListener(
-  "click",
-  function() {
-
-    scoring = {
-
-      kill:
-        Number(killPoints.value) || 0,
-
-      death:
-        Number(deathPoints.value) || 0,
-
-      assist:
-        Number(assistPoints.value) || 0
-
-    };
-
-
-    localStorage.setItem(
-      "sotScoring",
-      JSON.stringify(scoring)
-    );
-
-
-    render();
-
-  }
-);
-
-
-/* =========================
-   SAVE PLAYERS
-========================= */
+// =========================
+// SAVE PLAYERS
+// =========================
 
 function savePlayers() {
 
@@ -167,14 +90,50 @@ function savePlayers() {
 
 }
 
+// =========================
+// SAVE SCORING
+// =========================
 
-/* =========================
-   ADD PLAYER
-========================= */
+if (applyScoring) {
 
-form.addEventListener(
-  "submit",
-  function(event) {
+  applyScoring.addEventListener("click", function() {
+
+    scoring = {
+
+      win: Number(winPoints.value) || 0,
+
+      mvp: Number(mvpPoints.value) || 0,
+
+      quadra: Number(quadraPoints.value) || 0,
+
+      penta: Number(pentaPoints.value) || 0,
+
+      ppcc: Number(ppccPoints.value) || 0,
+
+      tank: Number(tankPoints.value) || 0,
+
+      dps: Number(dpsPoints.value) || 0
+
+    };
+
+    localStorage.setItem(
+      "sotScoring",
+      JSON.stringify(scoring)
+    );
+
+    render();
+
+  });
+
+}
+
+// =========================
+// ADD PLAYER
+// =========================
+
+if (form) {
+
+  form.addEventListener("submit", function(event) {
 
     event.preventDefault();
 
@@ -183,69 +142,43 @@ form.addEventListener(
 
     if (!name) return;
 
-
     players.push({
 
       id: Date.now(),
 
       name: name,
 
-      kills:
-        Number(kills.value) || 0,
+      win: 0,
 
-      deaths:
-        Number(deaths.value) || 0,
+      mvp: 0,
 
-      assists:
-        Number(assists.value) || 0
+      quadra: 0,
+
+      penta: 0,
+
+      ppcc: 0,
+
+      tank: 0,
+
+      dps: 0
 
     });
-
 
     savePlayers();
 
     render();
 
-
     form.reset();
-
-    kills.value = 0;
-    deaths.value = 0;
-    assists.value = 0;
 
     playerName.focus();
 
-  }
-);
-
-
-/* =========================
-   DELETE PLAYER
-========================= */
-
-function deletePlayer(id) {
-
-  if (!confirm("Delete this player?")) {
-    return;
-  }
-
-
-  players =
-    players.filter(
-      player => player.id !== id
-    );
-
-
-  savePlayers();
-
-  render();
+  });
 
 }
 
-
-/* =========================
-   EDIT PLAYER
-========================= */
+// =========================
+// EDIT PLAYER
+// =========================
 
 function editPlayer(id) {
 
@@ -254,9 +187,7 @@ function editPlayer(id) {
       player => player.id === id
     );
 
-
   if (!player) return;
-
 
   const newName =
     prompt(
@@ -266,55 +197,85 @@ function editPlayer(id) {
 
   if (newName === null) return;
 
-
-  const newKills =
+  const win =
     prompt(
-      "Kills:",
-      player.kills
+      "Wins:",
+      player.win
     );
 
-  if (newKills === null) return;
+  if (win === null) return;
 
-
-  const newDeaths =
+  const mvp =
     prompt(
-      "Deaths:",
-      player.deaths
+      "MVP:",
+      player.mvp
     );
 
-  if (newDeaths === null) return;
+  if (mvp === null) return;
 
-
-  const newAssists =
+  const quadra =
     prompt(
-      "Assists:",
-      player.assists
+      "Quadra Kills:",
+      player.quadra
     );
 
-  if (newAssists === null) return;
+  if (quadra === null) return;
 
+  const penta =
+    prompt(
+      "Penta Kills:",
+      player.penta
+    );
+
+  if (penta === null) return;
+
+  const ppcc =
+    prompt(
+      "PPCC ×5:",
+      player.ppcc
+    );
+
+  if (ppcc === null) return;
+
+  const tank =
+    prompt(
+      "Perfect Teamfight — Tank 100%:",
+      player.tank
+    );
+
+  if (tank === null) return;
+
+  const dps =
+    prompt(
+      "Perfect Teamfight — DPS 100%:",
+      player.dps
+    );
+
+  if (dps === null) return;
 
   player.name =
     newName.trim() || player.name;
 
-  player.kills =
-    Math.max(
-      0,
-      Number(newKills) || 0
-    );
+  player.win =
+    Math.max(0, Number(win) || 0);
 
-  player.deaths =
-    Math.max(
-      0,
-      Number(newDeaths) || 0
-    );
+  player.mvp =
+    Math.max(0, Number(mvp) || 0);
 
-  player.assists =
-    Math.max(
-      0,
-      Number(newAssists) || 0
-    );
+  player.quadra =
+    Math.max(0, Number(quadra) || 0);
 
+  player.penta =
+    Math.max(0, Number(penta) || 0);
+
+  player.ppcc =
+    Math.max(0, Number(ppcc) || 0);
+
+  player.tank =
+    Math.max(0, Number(tank) || 0);
+
+  player.dps =
+    Math.max(0, Number(dps) || 0);
 
   savePlayers();
 
@@ -322,81 +283,80 @@ function editPlayer(id) {
 
 }
 
+// =========================
+// DELETE PLAYER
+// =========================
 
-/* =========================
-   RENDER
-========================= */
+function deletePlayer(id) {
+
+  if (
+    !confirm(
+      "Delete this player?"
+    )
+  ) {
+    return;
+  }
+
+  players =
+    players.filter(
+      player => player.id !== id
+    );
+
+  savePlayers();
+
+  render();
+
+}
+
+// =========================
+// RENDER LEADERBOARD
+// =========================
 
 function render() {
 
-  const query =
-    search.value
-      .toLowerCase()
-      .trim();
+  if (!leaderboard) return;
 
+  const query =
+    search
+      ? search.value.toLowerCase().trim()
+      : "";
 
   const sorted =
     [...players].sort(
-      (a, b) => {
-
-        const scoreA =
-          calculateSOTScore(
-            a.kills,
-            a.deaths,
-            a.assists
-          );
-
-        const scoreB =
-          calculateSOTScore(
-            b.kills,
-            b.deaths,
-            b.assists
-          );
-
-
-        return scoreB - scoreA;
-
-      }
+      (a, b) =>
+        calculateSOTScore(b) -
+        calculateSOTScore(a)
     );
-
 
   const filtered =
-    sorted.filter(
-      player =>
-        player.name
-          .toLowerCase()
-          .includes(query)
+    sorted.filter(player =>
+      player.name
+        .toLowerCase()
+        .includes(query)
     );
-
 
   leaderboard.innerHTML = "";
 
-
   if (filtered.length === 0) {
 
-    emptyState.style.display =
-      "block";
+    if (emptyState) {
+      emptyState.style.display = "block";
+    }
 
   } else {
 
-    emptyState.style.display =
-      "none";
-
+    if (emptyState) {
+      emptyState.style.display = "none";
+    }
 
     filtered.forEach(
       (player, index) => {
 
         const score =
-          calculateSOTScore(
-            player.kills,
-            player.deaths,
-            player.assists
-          );
-
+          calculateSOTScore(player);
 
         const row =
           document.createElement("tr");
-
 
         row.innerHTML = `
 
@@ -408,11 +368,19 @@ function render() {
             ${escapeHTML(player.name)}
           </td>
 
-          <td>${player.kills}</td>
+          <td>${player.win}</td>
 
-          <td>${player.deaths}</td>
+          <td>${player.mvp}</td>
 
-          <td>${player.assists}</td>
+          <td>${player.quadra}</td>
+
+          <td>${player.penta}</td>
+
+          <td>${player.ppcc}</td>
+
+          <td>${player.tank}</td>
+
+          <td>${player.dps}</td>
 
           <td class="points">
             ${score}
@@ -436,7 +404,6 @@ function render() {
 
         `;
 
-
         leaderboard.appendChild(row);
 
       }
@@ -444,79 +411,67 @@ function render() {
 
   }
 
+  // =========================
+  // STATS
+  // =========================
 
-  /* =========================
-     TOP STATS
-  ========================= */
-
-  totalPlayers.textContent =
-    players.length;
-
+  if (totalPlayers) {
+    totalPlayers.textContent =
+      players.length;
+  }
 
   if (sorted.length > 0) {
 
     const leader =
       sorted[0];
 
-
     const score =
-      calculateSOTScore(
-        leader.kills,
-        leader.deaths,
-        leader.assists
-      );
+      calculateSOTScore(leader);
 
+    if (topScore) {
+      topScore.textContent =
+        score;
+    }
 
-    topScore.textContent =
-      score;
-
-    leaderName.textContent =
-      leader.name;
+    if (leaderName) {
+      leaderName.textContent =
+        leader.name;
+    }
 
   } else {
 
-    topScore.textContent =
-      "0";
+    if (topScore) {
+      topScore.textContent = "0";
+    }
 
-    leaderName.textContent =
-      "—";
+    if (leaderName) {
+      leaderName.textContent = "—";
+    }
 
   }
 
 }
 
+// =========================
+// SEARCH
+// =========================
 
-/* =========================
-   SEARCH
-========================= */
+if (search) {
 
-search.addEventListener(
-  "input",
-  render
-);
+  search.addEventListener(
+    "input",
+    render
+  );
 
+}
 
-/* =========================
-   SECURITY
-========================= */
+// =========================
+// SECURITY
+// =========================
 
 function escapeHTML(text) {
 
   const div =
     document.createElement("div");
 
-  div.textContent =
-    text;
-
-  return div.innerHTML;
-
-}
-
-
-/* =========================
-   START
-========================= */
-
-loadScoringSettings();
-
-render();
+  div.textContent = text;
