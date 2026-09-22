@@ -306,7 +306,6 @@
 
         <div class="form-grid scoring-grid">
 
-
           <div class="field">
 
             <label>WIN POINTS</label>
@@ -425,90 +424,174 @@
       </section>
 
     </div>
-<!-- LIVE CONTROL — SECTION 3 -->
-    <section id="liveControl" class="admin-only" style="display:none;">
-  <h2>LIVE CONTROL</h2>
 
-  <div class="live-status">
-    <span class="live-dot"></span>
-    <strong>LIVE</strong>
-  </div>
 
-  <div class="match-control">
-    <label for="currentMatch">MATCH</label>
+    <!-- =========================
+         LIVE CONTROL — SECTION 3
+    ========================== -->
 
-    <div class="number-control">
-      <button type="button" onclick="changeMatch(-1)">−</button>
+    <section
+      id="liveControl"
+      class="admin-only"
+      style="display:none;"
+    >
 
-      <input
-        id="currentMatch"
-        type="number"
-        min="1"
-        value="1"
-        onchange="setMatch(this.value)"
+      <h2>LIVE CONTROL</h2>
+
+      <div class="live-status">
+
+        <span class="live-dot"></span>
+
+        <strong>
+          LIVE
+        </strong>
+
+      </div>
+
+
+      <div class="match-control">
+
+        <label for="currentMatch">
+          MATCH
+        </label>
+
+        <div class="number-control">
+
+          <button
+            type="button"
+            onclick="changeMatch(-1)"
+          >
+            −
+          </button>
+
+          <input
+            id="currentMatch"
+            type="number"
+            min="1"
+            value="1"
+            onchange="setMatch(this.value)"
+          >
+
+          <button
+            type="button"
+            onclick="changeMatch(1)"
+          >
+            +
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <button
+        type="button"
+        id="finalizeTournamentBtn"
+        onclick="finalizeTournament()"
+      >
+        FINALIZE TOURNAMENT
+      </button>
+
+    </section>
+
+
+    <!-- =========================
+         RESULT CONTROL — SECTION 4
+    ========================== -->
+
+    <section
+      id="resultControl"
+      class="panel result-control"
+      style="display:none;"
+    >
+
+      <div class="panel-title">
+
+        <div>
+
+          <h2>
+            TOURNAMENT RESULT
+          </h2>
+
+          <span>
+            Generate the final SOT leaderboard result
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="result-status">
+
+        <span>🏁</span>
+
+        <strong id="resultStatusText">
+          TOURNAMENT FINAL
+        </strong>
+
+      </div>
+
+
+      <button
+        type="button"
+        id="generateResultBtn"
+        class="primary-btn"
+      >
+        GENERATE RESULT IMAGE
+      </button>
+
+
+      <div
+        id="resultPreview"
+        class="result-preview"
+        style="display:none;"
       >
 
-      <button type="button" onclick="changeMatch(1)">+</button>
-    </div>
-  </div>
+        <img
+          id="resultImage"
+          alt="SOT Tournament Result"
+        >
 
-  <button
-    type="button"
-    id="finalizeTournamentBtn"
-    onclick="finalizeTournament()"
-  >
-    FINALIZE TOURNAMENT
-  </button>
-</section>
-<!-- =========================
-     RESULT CONTROL — SECTION 4
-========================== -->
+      </div>
 
-<section
-  id="resultControl"
-  class="panel result-control"
-  style="display:none;"
->
+    </section>
 
-  <div class="panel-title">
 
-    <div>
-      <h2>TOURNAMENT RESULT</h2>
+    <!-- =========================
+         TOP 5 PLAYERS — SECTION 5A
+    ========================== -->
 
-      <span>
-        Generate the final SOT leaderboard result
-      </span>
-    </div>
-
-  </div>
-
-  <div class="result-status">
-    <span>🏁</span>
-    <strong id="resultStatusText">
-      TOURNAMENT FINAL
-    </strong>
-  </div>
-
-  <button
-    type="button"
-    id="generateResultBtn"
-    class="primary-btn"
-  >
-    GENERATE RESULT IMAGE
-  </button>
-
-  <div
-    id="resultPreview"
-    class="result-preview"
-    style="display:none;"
-  >
-    <img
-      id="resultImage"
-      alt="SOT Tournament Result"
+    <section
+      id="topFive"
+      class="top-five"
     >
-  </div>
 
-</section>
+      <div class="top-five-header">
+
+        <div>
+
+          <h2>
+            TOP 5 PLAYERS
+          </h2>
+
+          <span>
+            Highest SOT scores
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="topFiveList"
+        class="top-five-list"
+      ></div>
+
+    </section>
+
+
     <!-- =========================
          LEADERBOARD
          EVERYONE CAN VIEW
@@ -520,15 +603,22 @@
 
         <div>
 
-          <h2>Leaderboard</h2>
+          <h2>
+            Leaderboard
+          </h2>
 
-<div id="liveMatchDisplay" class="live-match-display">
-  🔴 LIVE — MATCH 1
-</div>
 
-<span>
-  SOT achievement standings
-</span>
+          <div
+            id="liveMatchDisplay"
+            class="live-match-display"
+          >
+            🔴 LIVE — MATCH 1
+          </div>
+
+
+          <span>
+            SOT achievement standings
+          </span>
 
         </div>
 
@@ -596,7 +686,9 @@
 
         <div>
 
-          <h2>SOT Scoring</h2>
+          <h2>
+            SOT Scoring
+          </h2>
 
           <span>
             Achievement-based scoring system
@@ -616,10 +708,15 @@
 
 
       <p>
-        <strong>PPCC ×5</strong>
+
+        <strong>
+          PPCC ×5
+        </strong>
+
         means the player successfully applies
         crowd control to all 5 enemy players
         and the game displays PPCC ×5.
+
       </p>
 
 
