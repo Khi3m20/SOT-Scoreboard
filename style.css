@@ -948,3 +948,173 @@ footer {
       0 4px 20px rgba(255, 60, 50, 0.18);
   }
 }
+/* =========================================================
+   SOT ACHIEVEMENT BUTTONS — ESPORTS UPGRADE
+   ========================================================= */
+
+.achievement-control {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-width: 96px;
+}
+
+/* Number */
+.achievement-value {
+  min-width: 26px;
+  height: 30px;
+  padding: 0 5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 8px;
+
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255,255,255,0.06),
+      rgba(255,255,255,0.015)
+    );
+
+  border: 1px solid rgba(255,255,255,0.08);
+
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 900;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.05),
+    0 3px 10px rgba(0,0,0,0.25);
+}
+
+/* Base button */
+.achievement-control button {
+  position: relative;
+
+  width: 31px;
+  height: 31px;
+
+  padding: 0;
+
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 9px;
+
+  color: #ffffff;
+
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+
+  transition:
+    transform 0.14s ease,
+    border-color 0.14s ease,
+    box-shadow 0.14s ease,
+    filter 0.14s ease;
+}
+
+/* Shine */
+.achievement-control button::before {
+  content: "";
+
+  position: absolute;
+  inset: 0;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,0.12),
+      transparent 45%
+    );
+
+  opacity: 0.7;
+
+  pointer-events: none;
+}
+
+/* MINUS */
+.achievement-minus {
+  background:
+    linear-gradient(
+      145deg,
+      #32191d,
+      #170d10
+    );
+}
+
+.achievement-minus:hover {
+  transform: translateY(-2px) scale(1.05);
+
+  border-color: rgba(255,80,80,0.8);
+
+  color: #ff7777;
+
+  box-shadow:
+    0 7px 18px rgba(255,50,50,0.25),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* PLUS */
+.achievement-plus {
+  background:
+    linear-gradient(
+      145deg,
+      #392515,
+      #191009
+    );
+}
+
+.achievement-plus:hover {
+  transform: translateY(-2px) scale(1.05);
+
+  border-color: rgba(255,160,60,0.9);
+
+  color: #ffb35c;
+
+  box-shadow:
+    0 7px 18px rgba(255,120,40,0.28),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+}
+
+/* CLICK */
+.achievement-control button:active {
+  transform: scale(0.88);
+
+  filter: brightness(1.25);
+}
+
+/* Keyboard focus */
+.achievement-control button:focus-visible {
+  outline: none;
+
+  box-shadow:
+    0 0 0 3px rgba(255,255,255,0.08),
+    0 5px 15px rgba(0,0,0,0.4);
+}
+
+/* Make symbols sit perfectly */
+.achievement-control button {
+  text-align: center;
+  vertical-align: middle;
+}
+
+.achievement-control button:first-child {
+  font-size: 19px;
+}
+
+.achievement-control button:last-child {
+  font-size: 19px;
+}
