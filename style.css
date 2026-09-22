@@ -1943,3 +1943,76 @@ tbody tr:hover td:nth-child(10) strong {
   }
 
      }
+/* =========================================================
+   RESULT CONTROL — SECTION 4
+========================================================= */
+
+.result-control {
+  border-color:
+    rgba(255, 157, 61, 0.30);
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255, 63, 79, 0.10),
+      rgba(255, 157, 61, 0.08),
+      var(--panel)
+    );
+}
+
+.result-status {
+  display: inline-flex;
+
+  align-items: center;
+  gap: 9px;
+
+  margin-bottom: 18px;
+
+  padding: 8px 13px;
+
+  border-radius: 999px;
+
+  background:
+    rgba(255, 157, 61, 0.10);
+
+  border:
+    1px solid rgba(255, 157, 61, 0.30);
+
+  color:
+    var(--orange-light);
+
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+}
+
+.result-preview {
+  margin-top: 20px;
+
+  padding: 12px;
+
+  border-radius: 12px;
+
+  border:
+    1px solid var(--border);
+
+  background:
+    #080a0f;
+
+  overflow-x: auto;
+}
+
+.result-preview img {
+  display: block;
+
+  width: 100%;
+
+  min-width: 700px;
+
+  height: auto;
+
+  border-radius: 8px;
+
+  box-shadow:
+    0 15px 40px rgba(0, 0, 0, 0.45);
+}
