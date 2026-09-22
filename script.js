@@ -1,29 +1,12 @@
-// =====================================================
+// ============================================================
 // SOT SCOREBOARD
-// SECTION 1A — LOGIN / ADMIN PERMISSIONS
-// SECTION 2 — PLAYER ACHIEVEMENTS + / -
-// STORAGE LAYER — LOCAL READY / DATABASE READY
-// =====================================================
+// SECTION 1 + SECTION 2 + SECTION 3
+// ============================================================
 
 
-// =====================================================
-// AUTH ELEMENTS
-// =====================================================
-
-const loginBtn = document.getElementById("loginBtn");
-const logoutBtn = document.getElementById("logoutBtn");
-const loginPanel = document.getElementById("loginPanel");
-const loginForm = document.getElementById("loginForm");
-const loginUsername = document.getElementById("loginUsername");
-const loginPassword = document.getElementById("loginPassword");
-const loginMessage = document.getElementById("loginMessage");
-const authStatus = document.getElementById("authStatus");
-const adminControls = document.getElementById("adminControls");
-
-
-// =====================================================
-// PROTOTYPE ADMIN ACCOUNTS
-// =====================================================
+// ============================================================
+// PROTOTYPE ADMIN LOGIN
+// ============================================================
 
 const PROTOTYPE_ADMINS = [
   {
@@ -36,93 +19,35 @@ const PROTOTYPE_ADMINS = [
   }
 ];
 
-
-// =====================================================
-// AUTH STATE
-// =====================================================
-
 let isAdmin =
   localStorage.getItem("sotAdminLoggedIn") === "true";
 
 
-// =====================================================
-// STORAGE CONFIG
-// =====================================================
-//
-// IMPORTANT:
-// All player/scoring storage goes through this section.
-//
-// CURRENT:
-// LOCAL STORAGE
-//
-// FUTURE:
-// SUPABASE DATABASE
-//
-// Do NOT put localStorage.setItem/getItem elsewhere.
-// =====================================================
+// ============================================================
+// STORAGE LAYER
+// ============================================================
 
 const STORAGE_MODE = "local";
 
-
-// =====================================================
-// STORAGE LAYER
-// =====================================================
-
 const Storage = {
 
-  // -----------------------------------------------
-  // PLAYERS
-  // -----------------------------------------------
-
   loadPlayers() {
-
-    if (STORAGE_MODE === "local") {
-
-      return JSON.parse(
-        localStorage.getItem("sotPlayers")
-      ) || [];
-
-    }
-
-    // Future:
-    // return await Database.loadPlayers();
-
-    return [];
-
+    return JSON.parse(
+      localStorage.getItem("sotPlayers") || "[]"
+    );
   },
-
 
   savePlayers(data) {
-
-    if (STORAGE_MODE === "local") {
-
-      localStorage.setItem(
-        "sotPlayers",
-        JSON.stringify(data)
-      );
-
-      return;
-
-    }
-
-    // Future:
-    // await Database.savePlayers(data);
-
+    localStorage.setItem(
+      "sotPlayers",
+      JSON.stringify(data)
+    );
   },
 
-
-  // -----------------------------------------------
-  // SCORING
-  // -----------------------------------------------
-
   loadScoring() {
-
-    if (STORAGE_MODE === "local") {
-
-      return JSON.parse(
-        localStorage.getItem("sotScoring")
-      ) || {
-
+    return JSON.parse(
+      localStorage.getItem("sotScoring") ||
+      JSON.stringify({
         win: 10,
         mvp: 5,
         quadra: 8,
@@ -130,533 +55,372 @@ const Storage = {
         ppcc: 5,
         tank: 1,
         dps: 1
-
-      };
-
-    }
-
-    // Future:
-    // return await Database.loadScoring();
-
-    return {
-
-      win: 10,
-      mvp: 5,
-      quadra: 8,
-      penta: 12,
-      ppcc: 5,
-      tank: 1,
-      dps: 1
-
-    };
-
+      })
+    );
   },
 
-
   saveScoring(data) {
+    localStorage.setItem(
+      "sotScoring",
+      JSON.stringify(data)
+    );
+  },
 
-    if (STORAGE_MODE === "local") {
+  loadMatch() {
+    return Number(
+      localStorage.getItem("sotCurrentMatch")
+    ) || 1;
+  },
 
-      localStorage.setItem(
-        "sotScoring",
-        JSON.stringify(data)
-      );
+  saveMatch(match) {
+    localStorage.setItem(
+      "sotCurrentMatch",
+      String(match)
+    );
+  },
 
-      return;
+  loadTournamentStatus() {
+    return (
+      localStorage.getItem("sotTournamentStatus") ||
+      "LIVE"
+    );
+  },
 
-    }
-
-    // Future:
-    // await Database.saveScoring(data);
-
+  saveTournamentStatus(status) {
+    localStorage.setItem(
+      "sotTournamentStatus",
+      status
+    );
   }
-
 };
 
 
-// =====================================================
-// LOAD DATA THROUGH STORAGE LAYER
-// =====================================================
+// ============================================================
+// DATA
+// ============================================================
 
-let players =
-  Storage.loadPlayers();
+let players = Storage.loadPlayers();
 
-let scoring =
-  Storage.loadScoring();
+let scoring = Storage.loadScoring();
 
+let currentMatch = Storage.loadMatch();
 
-// =====================================================
-// SCOREBOARD ELEMENTS
-// =====================================================
-
-const form =
-  document.getElementById("playerForm");
-
-const playerName =
-  document.getElementById("playerName");
-
-const leaderboard =
-  document.getElementById("leaderboard");
-
-const emptyState =
-  document.getElementById("emptyState");
-
-const search =
-  document.getElementById("search");
-
-const totalPlayers =
-  document.getElementById("totalPlayers");
-
-const topScore =
-  document.getElementById("topScore");
-
-const leaderName =
-  document.getElementById("leaderName");
+let tournamentStatus =
+  Storage.loadTournamentStatus();
 
 
-// =====================================================
-// SCORING ELEMENTS
-// =====================================================
+// ============================================================
+// BASIC HELPERS
+// ============================================================
 
-const winPoints =
-  document.getElementById("winPoints");
+function escapeHTML(value) {
 
-const mvpPoints =
-  document.getElementById("mvpPoints");
-
-const quadraPoints =
-  document.getElementById("quadraPoints");
-
-const pentaPoints =
-  document.getElementById("pentaPoints");
-
-const ppccPoints =
-  document.getElementById("ppccPoints");
-
-const tankPoints =
-  document.getElementById("tankPoints");
-
-const dpsPoints =
-  document.getElementById("dpsPoints");
-
-const applyScoring =
-  document.getElementById("applyScoring");
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 
-// =====================================================
-// UPDATE AUTH UI
-// =====================================================
+// ============================================================
+// AUTH UI
+// ============================================================
 
 function updateAuthUI() {
 
-  if (isAdmin) {
+  const authStatus =
+    document.getElementById("authStatus");
 
-    if (authStatus) {
-      authStatus.textContent = "ADMIN";
-    }
+  const loginBtn =
+    document.getElementById("loginBtn");
 
-    if (loginBtn) {
-      loginBtn.style.display = "none";
-    }
+  const logoutBtn =
+    document.getElementById("logoutBtn");
 
-    if (logoutBtn) {
-      logoutBtn.style.display = "inline-block";
-    }
+  const adminControls =
+    document.getElementById("adminControls");
 
-    if (adminControls) {
-      adminControls.style.display = "block";
-    }
+  const liveControl =
+    document.getElementById("liveControl");
 
-  } else {
-
-    if (authStatus) {
-      authStatus.textContent = "VIEWER";
-    }
-
-    if (loginBtn) {
-      loginBtn.style.display = "inline-block";
-    }
-
-    if (logoutBtn) {
-      logoutBtn.style.display = "none";
-    }
-
-    if (adminControls) {
-      adminControls.style.display = "none";
-    }
-
+  if (authStatus) {
+    authStatus.textContent =
+      isAdmin ? "ADMIN" : "VIEWER";
   }
+
+  if (loginBtn) {
+    loginBtn.style.display =
+      isAdmin ? "none" : "inline-block";
+  }
+
+  if (logoutBtn) {
+    logoutBtn.style.display =
+      isAdmin ? "inline-block" : "none";
+  }
+
+  if (adminControls) {
+    adminControls.style.display =
+      isAdmin ? "block" : "none";
+  }
+
+  if (liveControl) {
+    liveControl.style.display =
+      isAdmin ? "block" : "none";
+  }
+
+  document
+    .querySelectorAll(".admin-action")
+    .forEach(element => {
+      element.style.display =
+        isAdmin ? "" : "none";
+    });
+
+  updateMatchUI();
+}
+
+
+// ============================================================
+// LOGIN PANEL
+// ============================================================
+
+function openLogin() {
+
+  const panel =
+    document.getElementById("loginPanel");
+
+  if (panel) {
+    panel.style.display = "block";
+  }
+}
+
+
+function closeLogin() {
+
+  const panel =
+    document.getElementById("loginPanel");
+
+  if (panel) {
+    panel.style.display = "none";
+  }
+}
+
+
+// ============================================================
+// LOGIN
+// ============================================================
+
+function login(username, password) {
+
+  const valid =
+    PROTOTYPE_ADMINS.some(
+      account =>
+        account.username === username &&
+        account.password === password
+    );
+
+  const message =
+    document.getElementById("loginMessage");
+
+  if (!valid) {
+
+    if (message) {
+      message.textContent =
+        "Invalid username or password.";
+      message.style.display = "block";
+    }
+
+    return false;
+  }
+
+  isAdmin = true;
+
+  localStorage.setItem(
+    "sotAdminLoggedIn",
+    "true"
+  );
+
+  if (message) {
+    message.style.display = "none";
+  }
+
+  closeLogin();
+
+  updateAuthUI();
 
   render();
 
+  return true;
 }
 
 
-// =====================================================
-// OPEN LOGIN
-// =====================================================
-
-if (loginBtn) {
-
-  loginBtn.addEventListener(
-    "click",
-    function() {
-
-      if (!loginPanel) return;
-
-      loginPanel.style.display = "block";
-
-      if (loginMessage) {
-        loginMessage.style.display = "none";
-      }
-
-      if (loginUsername) {
-        loginUsername.focus();
-      }
-
-    }
-  );
-
-}
-
-
-// =====================================================
-// LOGIN
-// =====================================================
-
-if (loginForm) {
-
-  loginForm.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const username =
-        loginUsername.value
-          .trim()
-          .toLowerCase();
-
-      const password =
-        loginPassword.value;
-
-      const validAdmin =
-        PROTOTYPE_ADMINS.find(
-          admin =>
-            admin.username === username &&
-            admin.password === password
-        );
-
-      if (!validAdmin) {
-
-        if (loginMessage) {
-
-          loginMessage.textContent =
-            "Invalid admin username or password.";
-
-          loginMessage.className =
-            "login-message error";
-
-          loginMessage.style.display =
-            "block";
-
-        }
-
-        return;
-
-      }
-
-      isAdmin = true;
-
-      localStorage.setItem(
-        "sotAdminLoggedIn",
-        "true"
-      );
-
-      if (loginForm) {
-        loginForm.reset();
-      }
-
-      if (loginPanel) {
-        loginPanel.style.display = "none";
-      }
-
-      updateAuthUI();
-
-    }
-  );
-
-}
-
-
-// =====================================================
+// ============================================================
 // LOGOUT
-// =====================================================
+// ============================================================
 
-if (logoutBtn) {
+function logout() {
 
-  logoutBtn.addEventListener(
-    "click",
-    function() {
+  isAdmin = false;
 
-      isAdmin = false;
-
-      localStorage.removeItem(
-        "sotAdminLoggedIn"
-      );
-
-      if (loginPanel) {
-        loginPanel.style.display = "none";
-      }
-
-      if (loginForm) {
-        loginForm.reset();
-      }
-
-      updateAuthUI();
-
-    }
+  localStorage.removeItem(
+    "sotAdminLoggedIn"
   );
 
+  closeLogin();
+
+  updateAuthUI();
+
+  render();
 }
 
 
-// =====================================================
-// LOAD SCORING INTO INPUTS
-// =====================================================
+// ============================================================
+// SCORE CALCULATION
+// ============================================================
 
-function loadScoringSettings() {
-
-  if (winPoints)
-    winPoints.value = scoring.win;
-
-  if (mvpPoints)
-    mvpPoints.value = scoring.mvp;
-
-  if (quadraPoints)
-    quadraPoints.value = scoring.quadra;
-
-  if (pentaPoints)
-    pentaPoints.value = scoring.penta;
-
-  if (ppccPoints)
-    ppccPoints.value = scoring.ppcc;
-
-  if (tankPoints)
-    tankPoints.value = scoring.tank;
-
-  if (dpsPoints)
-    dpsPoints.value = scoring.dps;
-
-}
-
-
-// =====================================================
-// CALCULATE SCORE
-// =====================================================
-
-function calculateSOTScore(player) {
+function calculateScore(player) {
 
   return (
-
-    (player.win * scoring.win) +
-
-    (player.mvp * scoring.mvp) +
-
-    (player.quadra * scoring.quadra) +
-
-    (player.penta * scoring.penta) +
-
-    (player.ppcc * scoring.ppcc) +
-
-    (player.tank * scoring.tank) +
-
-    (player.dps * scoring.dps)
-
+    Number(player.win || 0) * Number(scoring.win || 0) +
+    Number(player.mvp || 0) * Number(scoring.mvp || 0) +
+    Number(player.quadra || 0) * Number(scoring.quadra || 0) +
+    Number(player.penta || 0) * Number(scoring.penta || 0) +
+    Number(player.ppcc || 0) * Number(scoring.ppcc || 0) +
+    Number(player.tank || 0) * Number(scoring.tank || 0) +
+    Number(player.dps || 0) * Number(scoring.dps || 0)
   );
-
 }
 
 
-// =====================================================
-// APPLY SCORING
-// =====================================================
+// ============================================================
+// PLAYER STORAGE
+// ============================================================
 
-if (applyScoring) {
-
-  applyScoring.addEventListener(
-    "click",
-    function() {
-
-      if (!isAdmin) {
-        return;
-      }
-
-      scoring = {
-
-        win: Number(winPoints.value) || 0,
-
-        mvp: Number(mvpPoints.value) || 0,
-
-        quadra: Number(quadraPoints.value) || 0,
-
-        penta: Number(pentaPoints.value) || 0,
-
-        ppcc: Number(ppccPoints.value) || 0,
-
-        tank: Number(tankPoints.value) || 0,
-
-        dps: Number(dpsPoints.value) || 0
-
-      };
-
-      Storage.saveScoring(scoring);
-
-      render();
-
-    }
-  );
-
+function savePlayers() {
+  Storage.savePlayers(players);
 }
 
 
-// =====================================================
+// ============================================================
 // ADD PLAYER
-// =====================================================
+// ============================================================
 
-if (form) {
+function addPlayer(name) {
 
-  form.addEventListener(
-    "submit",
-    function(event) {
+  if (!isAdmin) {
+    alert("Admin access required.");
+    return;
+  }
 
-      event.preventDefault();
+  const playerName =
+    name.trim();
 
-      if (!isAdmin) {
-        return;
-      }
+  if (!playerName) {
+    return;
+  }
 
-      const name =
-        playerName.value.trim();
+  const player = {
 
-      if (!name) {
-        return;
-      }
+    id: Date.now(),
 
-      players.push({
+    name: playerName,
 
-        id: Date.now(),
+    win: 0,
+    mvp: 0,
+    quadra: 0,
+    penta: 0,
+    ppcc: 0,
+    tank: 0,
+    dps: 0
+  };
 
-        name: name,
+  players.push(player);
 
-        win: 0,
+  savePlayers();
 
-        mvp: 0,
-
-        quadra: 0,
-
-        penta: 0,
-
-        ppcc: 0,
-
-        tank: 0,
-
-        dps: 0
-
-      });
-
-      Storage.savePlayers(players);
-
-      form.reset();
-
-      render();
-
-      playerName.focus();
-
-    }
-  );
-
+  render();
 }
 
 
-// =====================================================
-// EDIT PLAYER NAME
-// =====================================================
+// ============================================================
+// EDIT PLAYER
+// ============================================================
 
 function editPlayer(id) {
 
   if (!isAdmin) {
+    alert("Admin access required.");
     return;
   }
 
   const player =
     players.find(
-      player =>
-        player.id === id
+      p => p.id === id
     );
 
-  if (!player) {
-    return;
-  }
+  if (!player) return;
 
   const newName =
     prompt(
-      "Player name:",
+      "Edit player name:",
       player.name
     );
 
-  if (newName === null) {
+  if (!newName || !newName.trim()) {
     return;
   }
 
-  const trimmedName =
+  player.name =
     newName.trim();
 
-  if (trimmedName) {
-    player.name = trimmedName;
-  }
-
-  Storage.savePlayers(players);
+  savePlayers();
 
   render();
-
 }
 
 
-// =====================================================
+// ============================================================
 // DELETE PLAYER
-// =====================================================
+// ============================================================
 
 function deletePlayer(id) {
 
   if (!isAdmin) {
+    alert("Admin access required.");
     return;
   }
 
-  if (
-    !confirm(
-      "Delete this player?"
-    )
-  ) {
+  const player =
+    players.find(
+      p => p.id === id
+    );
+
+  if (!player) return;
+
+  const confirmed =
+    confirm(
+      `Delete ${player.name}?`
+    );
+
+  if (!confirmed) {
     return;
   }
 
   players =
     players.filter(
-      player =>
-        player.id !== id
+      p => p.id !== id
     );
 
-  Storage.savePlayers(players);
+  savePlayers();
 
   render();
-
 }
 
 
-// =====================================================
-// CHANGE ACHIEVEMENT
-// =====================================================
+// ============================================================
+// ACHIEVEMENT + / -
+// ============================================================
 
 function changeAchievement(
   playerId,
@@ -670,41 +434,30 @@ function changeAchievement(
 
   const player =
     players.find(
-      player =>
-        player.id === playerId
+      p => p.id === playerId
     );
 
   if (!player) {
     return;
   }
 
-  if (
-    typeof player[achievement] !==
-    "number"
-  ) {
-
-    player[achievement] = 0;
-
-  }
-
-  player[achievement] += amount;
+  player[achievement] =
+    Number(player[achievement] || 0) +
+    amount;
 
   if (player[achievement] < 0) {
-
     player[achievement] = 0;
-
   }
 
-  Storage.savePlayers(players);
+  savePlayers();
 
   render();
-
 }
 
 
-// =====================================================
+// ============================================================
 // ACHIEVEMENT CONTROL
-// =====================================================
+// ============================================================
 
 function achievementControl(
   player,
@@ -712,25 +465,21 @@ function achievementControl(
 ) {
 
   const value =
-    player[achievement] || 0;
+    Number(player[achievement] || 0);
 
   if (!isAdmin) {
-
     return `
       <span class="achievement-value">
         ${value}
       </span>
     `;
-
   }
 
   return `
-
     <div class="achievement-control">
 
       <button
         type="button"
-        class="achievement-btn admin-action"
         onclick="changeAchievement(${player.id}, '${achievement}', -1)"
       >
         −
@@ -742,254 +491,634 @@ function achievementControl(
 
       <button
         type="button"
-        class="achievement-btn admin-action"
         onclick="changeAchievement(${player.id}, '${achievement}', 1)"
       >
         +
       </button>
 
     </div>
-
   `;
-
 }
 
 
-// =====================================================
-// RENDER LEADERBOARD
-// =====================================================
+// ============================================================
+// SCORING SETTINGS
+// ============================================================
 
-function render() {
+function getScoringInputs() {
 
-  if (!leaderboard) {
+  return {
+    win:
+      document.getElementById("winPoints"),
+
+    mvp:
+      document.getElementById("mvpPoints"),
+
+    quadra:
+      document.getElementById("quadraPoints"),
+
+    penta:
+      document.getElementById("pentaPoints"),
+
+    ppcc:
+      document.getElementById("ppccPoints"),
+
+    tank:
+      document.getElementById("tankPoints"),
+
+    dps:
+      document.getElementById("dpsPoints")
+  };
+}
+
+
+function loadScoringSettings() {
+
+  const inputs =
+    getScoringInputs();
+
+  Object.keys(inputs)
+    .forEach(key => {
+
+      if (inputs[key]) {
+        inputs[key].value =
+          scoring[key];
+      }
+
+    });
+}
+
+
+function applyScoring() {
+
+  if (!isAdmin) {
+    alert("Admin access required.");
     return;
   }
 
-  const query =
-    search
-      ? search.value
-          .toLowerCase()
-          .trim()
-      : "";
+  const inputs =
+    getScoringInputs();
 
-  const sorted =
-    [...players].sort(
-      (a, b) =>
-        calculateSOTScore(b) -
-        calculateSOTScore(a)
+  Object.keys(inputs)
+    .forEach(key => {
+
+      if (!inputs[key]) {
+        return;
+      }
+
+      let value =
+        parseFloat(inputs[key].value);
+
+      if (isNaN(value) || value < 0) {
+        value = 0;
+      }
+
+      scoring[key] = value;
+
+    });
+
+  Storage.saveScoring(scoring);
+
+  loadScoringSettings();
+
+  render();
+}
+
+
+// ============================================================
+// LIVE CONTROL — SECTION 3
+// ============================================================
+
+function updateMatchUI() {
+
+  const input =
+    document.getElementById(
+      "currentMatch"
     );
 
-  const filtered =
-    sorted.filter(
-      player =>
-        player.name
-          .toLowerCase()
-          .includes(query)
+  if (input) {
+    input.value =
+      currentMatch;
+  }
+
+  const liveDisplay =
+    document.getElementById(
+      "liveMatchDisplay"
     );
 
-  leaderboard.innerHTML = "";
+  if (liveDisplay) {
 
-  if (filtered.length === 0) {
+    if (tournamentStatus === "FINAL") {
+
+      liveDisplay.textContent =
+        `🏁 FINAL — MATCH ${currentMatch}`;
+
+    } else {
+
+      liveDisplay.textContent =
+        `🔴 LIVE — MATCH ${currentMatch}`;
+
+    }
+  }
+}
+
+
+// ============================================================
+// SET MATCH
+// ============================================================
+
+function setMatch(value) {
+
+  if (!isAdmin) {
+    updateMatchUI();
+    return;
+  }
+
+  let match =
+    parseInt(value, 10);
+
+  if (
+    isNaN(match) ||
+    match < 1
+  ) {
+    match = 1;
+  }
+
+  currentMatch =
+    match;
+
+  Storage.saveMatch(
+    currentMatch
+  );
+
+  updateMatchUI();
+
+  render();
+}
+
+
+// ============================================================
+// CHANGE MATCH
+// ============================================================
+
+function changeMatch(amount) {
+
+  if (!isAdmin) {
+    return;
+  }
+
+  currentMatch += amount;
+
+  if (currentMatch < 1) {
+    currentMatch = 1;
+  }
+
+  Storage.saveMatch(
+    currentMatch
+  );
+
+  updateMatchUI();
+
+  render();
+}
+
+
+// ============================================================
+// FINALIZE TOURNAMENT
+// ============================================================
+
+function finalizeTournament() {
+
+  if (!isAdmin) {
+    alert("Admin access required.");
+    return;
+  }
+
+  if (
+    tournamentStatus === "FINAL"
+  ) {
+
+    alert(
+      "This tournament is already finalized."
+    );
+
+    return;
+  }
+
+  const confirmed =
+    confirm(
+      "Finalize this tournament?\n\n" +
+      "The tournament status will change from LIVE to FINAL."
+    );
+
+  if (!confirmed) {
+    return;
+  }
+
+  tournamentStatus =
+    "FINAL";
+
+  Storage.saveTournamentStatus(
+    tournamentStatus
+  );
+
+  updateMatchUI();
+
+  render();
+
+  alert(
+    "Tournament finalized."
+  );
+}
+
+
+// ============================================================
+// LEADERBOARD
+// ============================================================
+
+function renderLeaderboard() {
+
+  const tbody =
+    document.getElementById(
+      "leaderboard"
+    );
+
+  const emptyState =
+    document.getElementById(
+      "emptyState"
+    );
+
+  if (!tbody) {
+    return;
+  }
+
+  const sortedPlayers =
+    [...players]
+      .map(player => ({
+        ...player,
+        score:
+          calculateScore(player)
+      }))
+      .sort(
+        (a, b) =>
+          b.score - a.score
+      );
+
+  tbody.innerHTML = "";
+
+  if (
+    sortedPlayers.length === 0
+  ) {
 
     if (emptyState) {
       emptyState.style.display =
         "block";
     }
 
-  } else {
+    return;
+  }
 
-    if (emptyState) {
-      emptyState.style.display =
-        "none";
-    }
+  if (emptyState) {
+    emptyState.style.display =
+      "none";
+  }
 
-    filtered.forEach(
-      (player, index) => {
+  sortedPlayers.forEach(
+    (player, index) => {
 
-        const score =
-          calculateSOTScore(player);
+      const row =
+        document.createElement("tr");
 
-        const row =
-          document.createElement("tr");
+      row.innerHTML = `
 
-        row.innerHTML = `
+        <td>
+          ${index + 1}
+        </td>
 
-          <td class="rank">
-            #${index + 1}
-          </td>
-
-          <td class="player-name">
+        <td>
+          <strong>
             ${escapeHTML(player.name)}
-          </td>
+          </strong>
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "win"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "win"
+          )}
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "mvp"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "mvp"
+          )}
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "quadra"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "quadra"
+          )}
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "penta"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "penta"
+          )}
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "ppcc"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "ppcc"
+          )}
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "tank"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "tank"
+          )}
+        </td>
 
-          <td>
-            ${achievementControl(
-              player,
-              "dps"
-            )}
-          </td>
+        <td>
+          ${achievementControl(
+            player,
+            "dps"
+          )}
+        </td>
 
-          <td class="points">
-            ${score}
-          </td>
+        <td>
+          <strong>
+            ${player.score}
+          </strong>
+        </td>
 
-          <td>
+        <td class="admin-action">
 
-            <button
-              type="button"
-              class="action-btn admin-action"
-              onclick="editPlayer(${player.id})"
-              ${isAdmin ? "" : "style=\"display:none;\""}
-            >
-              Edit
-            </button>
+          <button
+            type="button"
+            onclick="editPlayer(${player.id})"
+          >
+            EDIT
+          </button>
 
-            <button
-              type="button"
-              class="action-btn delete admin-action"
-              onclick="deletePlayer(${player.id})"
-              ${isAdmin ? "" : "style=\"display:none;\""}
-            >
-              ×
-            </button>
+          <button
+            type="button"
+            onclick="deletePlayer(${player.id})"
+          >
+            DELETE
+          </button>
 
-          </td>
+        </td>
 
-        `;
+      `;
 
-        leaderboard.appendChild(row);
+      tbody.appendChild(row);
+    }
+  );
+}
 
-      }
+
+// ============================================================
+// STATS
+// ============================================================
+
+function renderStats() {
+
+  const totalPlayers =
+    document.getElementById(
+      "totalPlayers"
     );
 
-  }
+  const topScore =
+    document.getElementById(
+      "topScore"
+    );
 
+  const leaderName =
+    document.getElementById(
+      "leaderName"
+    );
 
-  // ===================================================
-  // STATS
-  // ===================================================
+  const sortedPlayers =
+    [...players]
+      .map(player => ({
+        ...player,
+        score:
+          calculateScore(player)
+      }))
+      .sort(
+        (a, b) =>
+          b.score - a.score
+      );
 
   if (totalPlayers) {
-
     totalPlayers.textContent =
       players.length;
-
   }
 
-  if (sorted.length > 0) {
-
-    const leader =
-      sorted[0];
-
-    const score =
-      calculateSOTScore(leader);
+  if (
+    sortedPlayers.length === 0
+  ) {
 
     if (topScore) {
-      topScore.textContent =
-        score;
+      topScore.textContent = "0";
     }
 
     if (leaderName) {
-      leaderName.textContent =
-        leader.name;
+      leaderName.textContent = "—";
     }
 
-  } else {
-
-    if (topScore) {
-      topScore.textContent =
-        "0";
-    }
-
-    if (leaderName) {
-      leaderName.textContent =
-        "—";
-    }
-
+    return;
   }
 
+  if (topScore) {
+    topScore.textContent =
+      sortedPlayers[0].score;
+  }
+
+  if (leaderName) {
+    leaderName.textContent =
+      sortedPlayers[0].name;
+  }
 }
 
 
-// =====================================================
+// ============================================================
 // SEARCH
-// =====================================================
+// ============================================================
 
-if (search) {
+function searchPlayers() {
 
-  search.addEventListener(
-    "input",
-    render
+  const input =
+    document.getElementById(
+      "search"
+    );
+
+  const query =
+    input
+      ? input.value
+        .trim()
+        .toLowerCase()
+      : "";
+
+  const rows =
+    document.querySelectorAll(
+      "#leaderboard tr"
+    );
+
+  rows.forEach(row => {
+
+    const name =
+      row
+        .cells[1]
+        ?.textContent
+        .toLowerCase() || "";
+
+    row.style.display =
+      name.includes(query)
+        ? ""
+        : "none";
+  });
+}
+
+
+// ============================================================
+// MAIN RENDER
+// ============================================================
+
+function render() {
+
+  renderLeaderboard();
+
+  renderStats();
+
+  updateAuthUI();
+
+  updateMatchUI();
+
+  loadScoringSettings();
+
+  searchPlayers();
+}
+
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+
+// Login button
+
+document
+  .getElementById("loginBtn")
+  ?.addEventListener(
+    "click",
+    openLogin
   );
 
-}
+
+// Logout button
+
+document
+  .getElementById("logoutBtn")
+  ?.addEventListener(
+    "click",
+    logout
+  );
 
 
-// =====================================================
-// ESCAPE HTML
-// =====================================================
+// Login form
 
-function escapeHTML(text) {
+document
+  .getElementById("loginForm")
+  ?.addEventListener(
+    "submit",
+    function(event) {
 
-  const div =
-    document.createElement("div");
+      event.preventDefault();
 
-  div.textContent =
-    text;
+      const username =
+        document
+          .getElementById(
+            "loginUsername"
+          )
+          .value
+          .trim();
 
-  return div.innerHTML;
+      const password =
+        document
+          .getElementById(
+            "loginPassword"
+          )
+          .value;
 
-}
+      login(
+        username,
+        password
+      );
+    }
+  );
 
 
-// =====================================================
-// INITIALIZE
-// =====================================================
+// Add player form
+
+document
+  .getElementById("playerForm")
+  ?.addEventListener(
+    "submit",
+    function(event) {
+
+      event.preventDefault();
+
+      const input =
+        document.getElementById(
+          "playerName"
+        );
+
+      if (!input) {
+        return;
+      }
+
+      addPlayer(
+        input.value
+      );
+
+      input.value = "";
+    }
+  );
+
+
+// Apply scoring
+
+document
+  .getElementById("applyScoring")
+  ?.addEventListener(
+    "click",
+    applyScoring
+  );
+
+
+// Search
+
+document
+  .getElementById("search")
+  ?.addEventListener(
+    "input",
+    searchPlayers
+  );
+
+
+// ============================================================
+// INITIALIZATION
+// ============================================================
 
 loadScoringSettings();
 
 updateAuthUI();
+
+updateMatchUI();
 
 render();
