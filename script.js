@@ -1,6 +1,6 @@
 // ============================================================
 // SOT SCOREBOARD
-// SECTION 1 + SECTION 2 + SECTION 3
+// SECTION 1 + SECTION 2 + SECTION 3 + SECTION 4 + SECTION 5A
 // ============================================================
 
 
@@ -10,12 +10,8 @@
 
 const PROTOTYPE_ADMINS = [
   {
-    username: "admin",
-    password: "sotdemo"
-  },
-  {
-    username: "jk",
-    password: "sotdemo"
+    username: "JKNN",
+    password: "SOTfree"
   }
 ];
 
@@ -99,11 +95,14 @@ const Storage = {
 // DATA
 // ============================================================
 
-let players = Storage.loadPlayers();
+let players =
+  Storage.loadPlayers();
 
-let scoring = Storage.loadScoring();
+let scoring =
+  Storage.loadScoring();
 
-let currentMatch = Storage.loadMatch();
+let currentMatch =
+  Storage.loadMatch();
 
 let tournamentStatus =
   Storage.loadTournamentStatus();
@@ -173,11 +172,14 @@ function updateAuthUI() {
   document
     .querySelectorAll(".admin-action")
     .forEach(element => {
+
       element.style.display =
         isAdmin ? "" : "none";
+
     });
 
   updateMatchUI();
+  updateResultUI();
 }
 
 
@@ -226,9 +228,12 @@ function login(username, password) {
   if (!valid) {
 
     if (message) {
+
       message.textContent =
         "Invalid username or password.";
-      message.style.display = "block";
+
+      message.style.display =
+        "block";
     }
 
     return false;
@@ -282,13 +287,26 @@ function logout() {
 function calculateScore(player) {
 
   return (
-    Number(player.win || 0) * Number(scoring.win || 0) +
-    Number(player.mvp || 0) * Number(scoring.mvp || 0) +
-    Number(player.quadra || 0) * Number(scoring.quadra || 0) +
-    Number(player.penta || 0) * Number(scoring.penta || 0) +
-    Number(player.ppcc || 0) * Number(scoring.ppcc || 0) +
-    Number(player.tank || 0) * Number(scoring.tank || 0) +
-    Number(player.dps || 0) * Number(scoring.dps || 0)
+    Number(player.win || 0) *
+      Number(scoring.win || 0) +
+
+    Number(player.mvp || 0) *
+      Number(scoring.mvp || 0) +
+
+    Number(player.quadra || 0) *
+      Number(scoring.quadra || 0) +
+
+    Number(player.penta || 0) *
+      Number(scoring.penta || 0) +
+
+    Number(player.ppcc || 0) *
+      Number(scoring.ppcc || 0) +
+
+    Number(player.tank || 0) *
+      Number(scoring.tank || 0) +
+
+    Number(player.dps || 0) *
+      Number(scoring.dps || 0)
   );
 }
 
@@ -298,6 +316,7 @@ function calculateScore(player) {
 // ============================================================
 
 function savePlayers() {
+
   Storage.savePlayers(players);
 }
 
@@ -309,7 +328,9 @@ function savePlayers() {
 function addPlayer(name) {
 
   if (!isAdmin) {
+
     alert("Admin access required.");
+
     return;
   }
 
@@ -350,7 +371,9 @@ function addPlayer(name) {
 function editPlayer(id) {
 
   if (!isAdmin) {
+
     alert("Admin access required.");
+
     return;
   }
 
@@ -359,7 +382,9 @@ function editPlayer(id) {
       p => p.id === id
     );
 
-  if (!player) return;
+  if (!player) {
+    return;
+  }
 
   const newName =
     prompt(
@@ -367,7 +392,10 @@ function editPlayer(id) {
       player.name
     );
 
-  if (!newName || !newName.trim()) {
+  if (
+    !newName ||
+    !newName.trim()
+  ) {
     return;
   }
 
@@ -387,7 +415,9 @@ function editPlayer(id) {
 function deletePlayer(id) {
 
   if (!isAdmin) {
+
     alert("Admin access required.");
+
     return;
   }
 
@@ -396,7 +426,9 @@ function deletePlayer(id) {
       p => p.id === id
     );
 
-  if (!player) return;
+  if (!player) {
+    return;
+  }
 
   const confirmed =
     confirm(
@@ -465,9 +497,12 @@ function achievementControl(
 ) {
 
   const value =
-    Number(player[achievement] || 0);
+    Number(
+      player[achievement] || 0
+    );
 
   if (!isAdmin) {
+
     return `
       <span class="achievement-value">
         ${value}
@@ -508,6 +543,7 @@ function achievementControl(
 function getScoringInputs() {
 
   return {
+
     win:
       document.getElementById("winPoints"),
 
@@ -541,8 +577,10 @@ function loadScoringSettings() {
     .forEach(key => {
 
       if (inputs[key]) {
+
         inputs[key].value =
           scoring[key];
+
       }
 
     });
@@ -552,7 +590,9 @@ function loadScoringSettings() {
 function applyScoring() {
 
   if (!isAdmin) {
+
     alert("Admin access required.");
+
     return;
   }
 
@@ -567,17 +607,24 @@ function applyScoring() {
       }
 
       let value =
-        parseFloat(inputs[key].value);
+        parseFloat(
+          inputs[key].value
+        );
 
-      if (isNaN(value) || value < 0) {
+      if (
+        isNaN(value) ||
+        value < 0
+      ) {
         value = 0;
       }
 
-      scoring[key] = value;
-
+      scoring[key] =
+        value;
     });
 
-  Storage.saveScoring(scoring);
+  Storage.saveScoring(
+    scoring
+  );
 
   loadScoringSettings();
 
@@ -586,7 +633,7 @@ function applyScoring() {
 
 
 // ============================================================
-// LIVE CONTROL — SECTION 3
+// LIVE CONTROL
 // ============================================================
 
 function updateMatchUI() {
@@ -597,29 +644,36 @@ function updateMatchUI() {
     );
 
   if (input) {
+
     input.value =
       currentMatch;
   }
 
-  const liveDisplay =
-    document.getElementById(
-      "liveMatchDisplay"
+  const displays =
+    document.querySelectorAll(
+      "#liveMatchDisplay"
     );
 
-  if (liveDisplay) {
+  displays.forEach(
+    liveDisplay => {
 
-    if (tournamentStatus === "FINAL") {
+      if (
+        tournamentStatus ===
+        "FINAL"
+      ) {
 
-      liveDisplay.textContent =
-        `🏁 FINAL — MATCH ${currentMatch}`;
+        liveDisplay.textContent =
+          `🏁 FINAL — MATCH ${currentMatch}`;
 
-    } else {
+      } else {
 
-      liveDisplay.textContent =
-        `🔴 LIVE — MATCH ${currentMatch}`;
+        liveDisplay.textContent =
+          `🔴 LIVE — MATCH ${currentMatch}`;
+
+      }
 
     }
-  }
+  );
 }
 
 
@@ -630,17 +684,23 @@ function updateMatchUI() {
 function setMatch(value) {
 
   if (!isAdmin) {
+
     updateMatchUI();
+
     return;
   }
 
   let match =
-    parseInt(value, 10);
+    parseInt(
+      value,
+      10
+    );
 
   if (
     isNaN(match) ||
     match < 1
   ) {
+
     match = 1;
   }
 
@@ -667,9 +727,13 @@ function changeMatch(amount) {
     return;
   }
 
-  currentMatch += amount;
+  currentMatch +=
+    amount;
 
-  if (currentMatch < 1) {
+  if (
+    currentMatch < 1
+  ) {
+
     currentMatch = 1;
   }
 
@@ -690,12 +754,15 @@ function changeMatch(amount) {
 function finalizeTournament() {
 
   if (!isAdmin) {
+
     alert("Admin access required.");
+
     return;
   }
 
   if (
-    tournamentStatus === "FINAL"
+    tournamentStatus ===
+    "FINAL"
   ) {
 
     alert(
@@ -733,6 +800,120 @@ function finalizeTournament() {
 
 
 // ============================================================
+// SORTED PLAYER DATA
+// ============================================================
+
+function getSortedPlayers() {
+
+  return [...players]
+
+    .map(player => ({
+
+      ...player,
+
+      score:
+        calculateScore(player)
+
+    }))
+
+    .sort(
+      (a, b) =>
+        b.score - a.score
+    );
+}
+
+
+// ============================================================
+// SECTION 5A — TOP 5 PLAYERS
+// ============================================================
+
+function renderTopFive() {
+
+  const container =
+    document.getElementById(
+      "topFiveList"
+    );
+
+  if (!container) {
+    return;
+  }
+
+  const sortedPlayers =
+    getSortedPlayers();
+
+  container.innerHTML = "";
+
+  if (
+    sortedPlayers.length === 0
+  ) {
+
+    container.innerHTML = `
+      <div class="top-five-empty">
+        No players yet.
+      </div>
+    `;
+
+    return;
+  }
+
+  sortedPlayers
+    .slice(0, 5)
+    .forEach(
+      (player, index) => {
+
+        const card =
+          document.createElement(
+            "div"
+          );
+
+        card.className =
+          "top-five-card";
+
+        card.innerHTML = `
+
+          <div class="top-five-rank">
+            #${index + 1}
+          </div>
+
+          <div class="top-five-player">
+
+            <strong>
+              ${escapeHTML(
+                player.name
+              )}
+            </strong>
+
+            <span>
+              ${player.win || 0} WIN
+              ·
+              ${player.mvp || 0} MVP
+            </span>
+
+          </div>
+
+          <div class="top-five-score">
+
+            <span>
+              SCORE
+            </span>
+
+            <strong>
+              ${player.score}
+            </strong>
+
+          </div>
+
+        `;
+
+        container.appendChild(
+          card
+        );
+      }
+    );
+}
+
+
+// ============================================================
 // LEADERBOARD
 // ============================================================
 
@@ -753,16 +934,7 @@ function renderLeaderboard() {
   }
 
   const sortedPlayers =
-    [...players]
-      .map(player => ({
-        ...player,
-        score:
-          calculateScore(player)
-      }))
-      .sort(
-        (a, b) =>
-          b.score - a.score
-      );
+    getSortedPlayers();
 
   tbody.innerHTML = "";
 
@@ -771,6 +943,7 @@ function renderLeaderboard() {
   ) {
 
     if (emptyState) {
+
       emptyState.style.display =
         "block";
     }
@@ -779,6 +952,7 @@ function renderLeaderboard() {
   }
 
   if (emptyState) {
+
     emptyState.style.display =
       "none";
   }
@@ -787,7 +961,9 @@ function renderLeaderboard() {
     (player, index) => {
 
       const row =
-        document.createElement("tr");
+        document.createElement(
+          "tr"
+        );
 
       row.innerHTML = `
 
@@ -797,7 +973,9 @@ function renderLeaderboard() {
 
         <td>
           <strong>
-            ${escapeHTML(player.name)}
+            ${escapeHTML(
+              player.name
+            )}
           </strong>
         </td>
 
@@ -876,7 +1054,10 @@ function renderLeaderboard() {
 
       `;
 
-      tbody.appendChild(row);
+      tbody.appendChild(
+        row
+      );
+
     }
   );
 }
@@ -904,18 +1085,10 @@ function renderStats() {
     );
 
   const sortedPlayers =
-    [...players]
-      .map(player => ({
-        ...player,
-        score:
-          calculateScore(player)
-      }))
-      .sort(
-        (a, b) =>
-          b.score - a.score
-      );
+    getSortedPlayers();
 
   if (totalPlayers) {
+
     totalPlayers.textContent =
       players.length;
   }
@@ -925,22 +1098,26 @@ function renderStats() {
   ) {
 
     if (topScore) {
-      topScore.textContent = "0";
+      topScore.textContent =
+        "0";
     }
 
     if (leaderName) {
-      leaderName.textContent = "—";
+      leaderName.textContent =
+        "—";
     }
 
     return;
   }
 
   if (topScore) {
+
     topScore.textContent =
       sortedPlayers[0].score;
   }
 
   if (leaderName) {
+
     leaderName.textContent =
       sortedPlayers[0].name;
   }
@@ -970,226 +1147,100 @@ function searchPlayers() {
       "#leaderboard tr"
     );
 
-  rows.forEach(row => {
+  rows.forEach(
+    row => {
 
-    const name =
-      row
-        .cells[1]
-        ?.textContent
-        .toLowerCase() || "";
+      const name =
+        row
+          .cells[1]
+          ?.textContent
+          .toLowerCase() || "";
 
-    row.style.display =
-      name.includes(query)
-        ? ""
-        : "none";
-  });
+      row.style.display =
+        name.includes(query)
+          ? ""
+          : "none";
+
+    }
+  );
 }
 
 
 // ============================================================
-// MAIN RENDER
-// ============================================================
-
-function render() {
-
-  renderLeaderboard();
-
-  renderStats();
-
-  updateAuthUI();
-
-  updateMatchUI();
-
-  loadScoringSettings();
-
-  searchPlayers();
-}
-
-
-// ============================================================
-// EVENT LISTENERS
-// ============================================================
-
-// Login button
-
-document
-  .getElementById("loginBtn")
-  ?.addEventListener(
-    "click",
-    openLogin
-  );
-
-
-// Logout button
-
-document
-  .getElementById("logoutBtn")
-  ?.addEventListener(
-    "click",
-    logout
-  );
-
-
-// Login form
-
-document
-  .getElementById("loginForm")
-  ?.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const username =
-        document
-          .getElementById(
-            "loginUsername"
-          )
-          .value
-          .trim();
-
-      const password =
-        document
-          .getElementById(
-            "loginPassword"
-          )
-          .value;
-
-      login(
-        username,
-        password
-      );
-    }
-  );
-
-
-// Add player form
-
-document
-  .getElementById("playerForm")
-  ?.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const input =
-        document.getElementById(
-          "playerName"
-        );
-
-      if (!input) {
-        return;
-      }
-
-      addPlayer(
-        input.value
-      );
-
-      input.value = "";
-    }
-  );
-
-
-// Apply scoring
-
-document
-  .getElementById("applyScoring")
-  ?.addEventListener(
-    "click",
-    applyScoring
-  );
-
-
-// Search
-
-document
-  .getElementById("search")
-  ?.addEventListener(
-    "input",
-    searchPlayers
-  );
-
-
-// ============================================================
-// INITIALIZATION
-// ============================================================
-
-loadScoringSettings();
-
-updateAuthUI();
-
-updateMatchUI();
-
-render();
-// ============================================================
-// RESULT CONTROL — SECTION 4
+// SECTION 4 — RESULT CONTROL
 // ============================================================
 
 function updateResultUI() {
 
   const resultControl =
-    document.getElementById("resultControl");
+    document.getElementById(
+      "resultControl"
+    );
 
   if (!resultControl) {
     return;
   }
 
-  // Only show result generation after tournament is FINAL
   resultControl.style.display =
-    tournamentStatus === "FINAL" && isAdmin
+    tournamentStatus === "FINAL" &&
+    isAdmin
       ? "block"
       : "none";
 }
 
 
-// ============================================================
-// GENERATE RESULT IMAGE
-// ============================================================
-
 function generateResultImage() {
 
   if (!isAdmin) {
-    alert("Admin access required.");
+
+    alert(
+      "Admin access required."
+    );
+
     return;
   }
 
-  if (tournamentStatus !== "FINAL") {
-    alert("Finalize the tournament first.");
+  if (
+    tournamentStatus !==
+    "FINAL"
+  ) {
+
+    alert(
+      "Finalize the tournament first."
+    );
+
     return;
   }
 
   const sortedPlayers =
-    [...players]
-      .map(player => ({
-        ...player,
-        score: calculateScore(player)
-      }))
-      .sort(
-        (a, b) =>
-          b.score - a.score
-      );
+    getSortedPlayers();
 
-  if (sortedPlayers.length === 0) {
-    alert("There are no players to include.");
+  if (
+    sortedPlayers.length === 0
+  ) {
+
+    alert(
+      "There are no players to include."
+    );
+
     return;
   }
 
-
-  // Canvas
   const canvas =
-    document.createElement("canvas");
+    document.createElement(
+      "canvas"
+    );
 
   canvas.width = 1600;
   canvas.height = 1000;
 
   const ctx =
-    canvas.getContext("2d");
+    canvas.getContext(
+      "2d"
+    );
 
 
-  // ========================================================
-  // BACKGROUND
-  // ========================================================
+  // Background
 
   const gradient =
     ctx.createLinearGradient(
@@ -1225,7 +1276,8 @@ function generateResultImage() {
   );
 
 
-  // Decorative red glow
+  // Red glow
+
   const glow =
     ctx.createRadialGradient(
       150,
@@ -1257,7 +1309,8 @@ function generateResultImage() {
   );
 
 
-  // Decorative orange glow
+  // Orange glow
+
   const orangeGlow =
     ctx.createRadialGradient(
       1450,
@@ -1289,9 +1342,7 @@ function generateResultImage() {
   );
 
 
-  // ========================================================
-  // HEADER
-  // ========================================================
+  // Title
 
   ctx.fillStyle =
     "#ffffff";
@@ -1304,6 +1355,7 @@ function generateResultImage() {
     90,
     105
   );
+
 
   ctx.fillStyle =
     "#9da6b5";
@@ -1335,6 +1387,7 @@ function generateResultImage() {
 
   ctx.fill();
 
+
   ctx.fillStyle =
     "#ffffff";
 
@@ -1348,9 +1401,7 @@ function generateResultImage() {
   );
 
 
-  // ========================================================
-  // DIVIDER
-  // ========================================================
+  // Divider
 
   const divider =
     ctx.createLinearGradient(
@@ -1386,9 +1437,7 @@ function generateResultImage() {
   );
 
 
-  // ========================================================
-  // TABLE HEADER
-  // ========================================================
+  // Table header
 
   ctx.fillStyle =
     "rgba(255,255,255,0.08)";
@@ -1399,6 +1448,7 @@ function generateResultImage() {
     1420,
     55
   );
+
 
   ctx.fillStyle =
     "#aeb6c4";
@@ -1449,21 +1499,26 @@ function generateResultImage() {
   );
 
 
-  // ========================================================
-  // PLAYER ROWS
-  // ========================================================
+  // Rows
 
   const maxRows = 10;
 
   sortedPlayers
-    .slice(0, maxRows)
+    .slice(
+      0,
+      maxRows
+    )
     .forEach(
       (player, index) => {
 
         const y =
-          275 + index * 62;
+          275 +
+          index * 62;
 
-        if (index % 2 === 0) {
+
+        if (
+          index % 2 === 0
+        ) {
 
           ctx.fillStyle =
             "rgba(255,255,255,0.025)";
@@ -1476,8 +1531,6 @@ function generateResultImage() {
           );
         }
 
-
-        // Rank
 
         ctx.fillStyle =
           index === 0
@@ -1494,8 +1547,6 @@ function generateResultImage() {
         );
 
 
-        // Name
-
         ctx.fillStyle =
           "#ffffff";
 
@@ -1503,13 +1554,16 @@ function generateResultImage() {
           "800 21px Arial";
 
         ctx.fillText(
-          String(player.name).slice(0, 28),
+          String(
+            player.name
+          ).slice(
+            0,
+            28
+          ),
           260,
           y + 40
         );
 
-
-        // Achievements
 
         ctx.fillStyle =
           "#cbd1da";
@@ -1542,8 +1596,6 @@ function generateResultImage() {
         );
 
 
-        // Score
-
         ctx.fillStyle =
           "#ffc067";
 
@@ -1551,17 +1603,18 @@ function generateResultImage() {
           "900 24px Arial";
 
         ctx.fillText(
-          String(player.score),
+          String(
+            player.score
+          ),
           1365,
           y + 40
         );
+
       }
     );
 
 
-  // ========================================================
-  // FOOTER
-  // ========================================================
+  // Footer
 
   ctx.fillStyle =
     "#737c8b";
@@ -1576,14 +1629,13 @@ function generateResultImage() {
   );
 
 
-  // ========================================================
-  // PREVIEW
-  // ========================================================
+  // Generate image
 
   const image =
     canvas.toDataURL(
       "image/png"
     );
+
 
   const preview =
     document.getElementById(
@@ -1595,23 +1647,24 @@ function generateResultImage() {
       "resultImage"
     );
 
+
   if (imageElement) {
+
     imageElement.src =
       image;
   }
 
   if (preview) {
+
     preview.style.display =
       "block";
   }
 
 
-  // ========================================================
-  // DOWNLOAD
-  // ========================================================
-
   const link =
-    document.createElement("a");
+    document.createElement(
+      "a"
+    );
 
   link.download =
     `SOT-Final-Match-${currentMatch}.png`;
@@ -1624,8 +1677,137 @@ function generateResultImage() {
 
 
 // ============================================================
-// RESULT BUTTON
+// MAIN RENDER
 // ============================================================
+
+function render() {
+
+  renderTopFive();
+
+  renderLeaderboard();
+
+  renderStats();
+
+  updateAuthUI();
+
+  updateMatchUI();
+
+  updateResultUI();
+
+  loadScoringSettings();
+
+  searchPlayers();
+}
+
+
+// ============================================================
+// EVENT LISTENERS
+// ============================================================
+
+// Login
+
+document
+  .getElementById("loginBtn")
+  ?.addEventListener(
+    "click",
+    openLogin
+  );
+
+
+// Logout
+
+document
+  .getElementById("logoutBtn")
+  ?.addEventListener(
+    "click",
+    logout
+  );
+
+
+// Login form
+
+document
+  .getElementById("loginForm")
+  ?.addEventListener(
+    "submit",
+    function(event) {
+
+      event.preventDefault();
+
+      const username =
+        document
+          .getElementById(
+            "loginUsername"
+          )
+          .value
+          .trim();
+
+      const password =
+        document
+          .getElementById(
+            "loginPassword"
+          )
+          .value;
+
+      login(
+        username,
+        password
+      );
+
+    }
+  );
+
+
+// Add player
+
+document
+  .getElementById("playerForm")
+  ?.addEventListener(
+    "submit",
+    function(event) {
+
+      event.preventDefault();
+
+      const input =
+        document.getElementById(
+          "playerName"
+        );
+
+      if (!input) {
+        return;
+      }
+
+      addPlayer(
+        input.value
+      );
+
+      input.value = "";
+
+    }
+  );
+
+
+// Apply scoring
+
+document
+  .getElementById("applyScoring")
+  ?.addEventListener(
+    "click",
+    applyScoring
+  );
+
+
+// Search
+
+document
+  .getElementById("search")
+  ?.addEventListener(
+    "input",
+    searchPlayers
+  );
+
+
+// Generate result
 
 document
   .getElementById(
@@ -1638,15 +1820,15 @@ document
 
 
 // ============================================================
-// UPDATE MAIN RENDER
+// INITIALIZATION
 // ============================================================
 
-const originalRender =
-  render;
+loadScoringSettings();
 
-render = function() {
+updateAuthUI();
 
-  originalRender();
+updateMatchUI();
 
-  updateResultUI();
-};
+updateResultUI();
+
+render();
