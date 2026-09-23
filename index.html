@@ -1,30 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
   <meta charset="UTF-8">
-
-  <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
-  >
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>SOT Scoreboard</title>
 
-  <link
-    rel="stylesheet"
-    href="style.css"
-  >
-
+  <link rel="stylesheet" href="style.css">
 </head>
-
 
 <body>
 
   <!-- =====================================================
        HEADER
-  ====================================================== -->
+       ===================================================== -->
 
   <header class="site-header">
 
@@ -32,9 +21,7 @@
 
       <div class="brand">
 
-        <h1>
-          SOT SCOREBOARD
-        </h1>
+        <h1>SOT SCOREBOARD</h1>
 
         <span>
           SATURDAY OPEN TOURNAMENT
@@ -71,10 +58,9 @@
   </header>
 
 
-
   <!-- =====================================================
-       LOGIN PANEL
-  ====================================================== -->
+       ADMIN LOGIN
+       ===================================================== -->
 
   <section
     id="loginPanel"
@@ -87,6 +73,7 @@
       <h2>
         ADMIN LOGIN
       </h2>
+
 
       <form id="loginForm">
 
@@ -125,17 +112,16 @@
   </section>
 
 
-
   <!-- =====================================================
-       MAIN
-  ====================================================== -->
+       MAIN CONTENT
+       ===================================================== -->
 
   <main class="main-content">
 
 
     <!-- ===================================================
          STATS
-    ==================================================== -->
+         =================================================== -->
 
     <section class="stats-grid">
 
@@ -155,7 +141,7 @@
       <div class="stat-card">
 
         <span>
-          TOP SCORE
+          TOP SOT SCORE
         </span>
 
         <strong id="topScore">
@@ -168,7 +154,7 @@
       <div class="stat-card">
 
         <span>
-          CURRENT LEADER
+          SOT LEADER
         </span>
 
         <strong id="leaderName">
@@ -183,7 +169,7 @@
 
     <!-- ===================================================
          ADMIN CONTROLS
-    ==================================================== -->
+         =================================================== -->
 
     <section
       id="adminControls"
@@ -192,15 +178,14 @@
     >
 
 
-      <!-- ===============================================
-           ADD PLAYER
-      ================================================ -->
+      <!-- ADD PLAYER -->
 
       <div class="control-panel">
 
         <h2>
           ADD PLAYER
         </h2>
+
 
         <form id="playerForm">
 
@@ -211,6 +196,7 @@
             maxlength="40"
             required
           >
+
 
           <button
             type="submit"
@@ -224,9 +210,7 @@
 
 
 
-      <!-- ===============================================
-           SCORING SETTINGS
-      ================================================ -->
+      <!-- SCORING SETTINGS -->
 
       <div class="control-panel">
 
@@ -239,6 +223,7 @@
 
 
           <label>
+
             WIN
 
             <input
@@ -252,6 +237,7 @@
 
 
           <label>
+
             MVP
 
             <input
@@ -265,6 +251,7 @@
 
 
           <label>
+
             QUADRA
 
             <input
@@ -278,6 +265,7 @@
 
 
           <label>
+
             PENTA
 
             <input
@@ -291,6 +279,7 @@
 
 
           <label>
+
             PPCC ×5
 
             <input
@@ -304,6 +293,7 @@
 
 
           <label>
+
             TANK 100%
 
             <input
@@ -317,6 +307,7 @@
 
 
           <label>
+
             DPS 100%
 
             <input
@@ -327,6 +318,7 @@
             >
 
           </label>
+
 
         </div>
 
@@ -342,15 +334,9 @@
 
 
 
-      <!-- ===============================================
-           LIVE CONTROL
-      ================================================ -->
+      <!-- LIVE MATCH -->
 
-      <div
-        id="liveControl"
-        class="control-panel"
-        style="display:none;"
-      >
+      <div class="control-panel">
 
         <h2>
           LIVE CONTROL
@@ -372,7 +358,6 @@
             type="number"
             min="1"
             value="1"
-            onchange="setMatch(this.value)"
           >
 
 
@@ -387,40 +372,77 @@
 
 
         <div
-          id="liveMatchDisplay"
+          id="adminLiveMatchDisplay"
           class="live-match-display"
         >
-          🔴 LIVE — MATCH 1
+          LIVE — MATCH 1
         </div>
+
+      </div>
+
+
+
+      <!-- LEADERBOARD CONTROL -->
+
+      <div class="control-panel">
+
+        <h2>
+          LEADERBOARD CONTROL
+        </h2>
+
+
+        <p class="control-description">
+          Recalculate all player scores and update the current leaderboard.
+        </p>
 
 
         <button
+          id="updateLeaderboardBtn"
           type="button"
-          onclick="finalizeTournament()"
         >
-          FINALIZE TOURNAMENT
+          UPDATE LEADERBOARD
         </button>
 
       </div>
 
 
 
-      <!-- ===============================================
-           TOURNAMENT RESULT
-      ================================================ -->
+      <!-- TOURNAMENT CONTROL -->
 
-      <div
-        id="resultControl"
-        class="control-panel result-control"
-        style="display:none;"
-      >
+      <div class="control-panel">
+
+        <h2>
+          TOURNAMENT CONTROL
+        </h2>
+
+
+        <p class="control-description">
+          Archive the current tournament and start a new one.
+        </p>
+
+
+        <button
+          id="newTournamentBtn"
+          type="button"
+        >
+          NEW TOURNAMENT
+        </button>
+
+      </div>
+
+
+
+      <!-- RESULT IMAGE -->
+
+      <div class="control-panel result-control">
 
         <h2>
           TOURNAMENT RESULT
         </h2>
 
-        <p>
-          Tournament finalized. Generate the final result image.
+
+        <p class="control-description">
+          Generate a final result image from the current leaderboard.
         </p>
 
 
@@ -441,6 +463,7 @@
             RESULT PREVIEW
           </h3>
 
+
           <img
             id="resultImage"
             src=""
@@ -451,21 +474,22 @@
 
       </div>
 
+
     </section>
 
 
 
     <!-- ===================================================
          LIVE STATUS
-    ==================================================== -->
+         =================================================== -->
 
     <section class="status-section">
 
       <div
-        id="liveMatchDisplay"
+        id="viewerLiveMatchDisplay"
         class="live-match-display"
       >
-        🔴 LIVE — MATCH 1
+        LIVE — MATCH 1
       </div>
 
     </section>
@@ -474,7 +498,7 @@
 
     <!-- ===================================================
          SEARCH
-    ==================================================== -->
+         =================================================== -->
 
     <section class="search-section">
 
@@ -490,8 +514,8 @@
 
 
     <!-- ===================================================
-         TOP 5 PLAYERS — SECTION 5A
-    ==================================================== -->
+         TOP 5
+         =================================================== -->
 
     <section
       id="topFive"
@@ -526,7 +550,7 @@
 
     <!-- ===================================================
          LEADERBOARD
-    ==================================================== -->
+         =================================================== -->
 
     <section class="leaderboard-section">
 
@@ -605,7 +629,6 @@
 
 
           <tbody id="leaderboard">
-
           </tbody>
 
         </table>
@@ -634,8 +657,40 @@
 
 
     <!-- ===================================================
-         RULES
-    ==================================================== -->
+         TOURNAMENT HISTORY
+         =================================================== -->
+
+    <section class="rules-section">
+
+      <div class="section-heading">
+
+        <div>
+
+          <h2>
+            TOURNAMENT HISTORY
+          </h2>
+
+          <span>
+            Previous Saturday tournaments
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div
+        id="historyList"
+        class="history-list"
+      ></div>
+
+    </section>
+
+
+
+    <!-- ===================================================
+         SCORING RULES
+         =================================================== -->
 
     <section class="rules-section">
 
@@ -657,6 +712,7 @@
 
 
       <div class="rules-grid">
+
 
         <div class="rule-card">
 
@@ -717,7 +773,7 @@
           </strong>
 
           <span>
-            Counts as one PPCC achievement event.
+            Perfect Crowd Control achievement.
           </span>
 
         </div>
@@ -730,7 +786,7 @@
           </strong>
 
           <span>
-            Points awarded for each Tank 100% achievement.
+            Perfect Teamfight Tank achievement.
           </span>
 
         </div>
@@ -743,10 +799,11 @@
           </strong>
 
           <span>
-            Points awarded for each DPS 100% achievement.
+            Perfect Teamfight DPS achievement.
           </span>
 
         </div>
+
 
       </div>
 
@@ -759,7 +816,7 @@
 
   <!-- =====================================================
        FOOTER
-  ====================================================== -->
+       ===================================================== -->
 
   <footer class="site-footer">
 
@@ -781,10 +838,9 @@
 
   <!-- =====================================================
        JAVASCRIPT
-  ====================================================== -->
+       ===================================================== -->
 
   <script src="script.js"></script>
 
 </body>
-
 </html>
