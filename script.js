@@ -1,13 +1,3 @@
-// ============================================================
-// SOT SCOREBOARD
-// SECTION 1 + SECTION 2 + SECTION 3 + SECTION 4 + SECTION 5A
-// ============================================================
-
-
-// ============================================================
-// PROTOTYPE ADMIN LOGIN
-// ============================================================
-
 const PROTOTYPE_ADMINS = [
   {
     username: "JKNN",
@@ -15,1224 +5,1542 @@ const PROTOTYPE_ADMINS = [
   }
 ];
 
-let isAdmin =
-  localStorage.getItem("sotAdminLoggedIn") === "true";
+const DEFAULT_SCORING = {
+  win: 10,
+  mvp: 5,
+  quadra: 8,
+  penta: 12,
+  ppcc: 5,
+  tank: 1,
+  dps: 1
+};
+
+const STORAGE_KEYS = {
+  players: "sot_players",
+  scoring: "sot_scoring",
+  match: "sot_match",
+  history: "sot_history",
+  tournament: "sot_tournament"
+};
 
 
-// ============================================================
-// STORAGE LAYER
-// ============================================================
-
-const STORAGE_MODE = "local";
+/* =========================================================
+   STORAGE
+   ========================================================= */
 
 const Storage = {
 
   loadPlayers() {
-    return JSON.parse(
-      localStorage.getItem("sotPlayers") || "[]"
-    );
+    try {
+      return JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.players)
+      ) || [];
+    } catch {
+      return [];
+    }
   },
 
   savePlayers(data) {
     localStorage.setItem(
-      "sotPlayers",
+      STORAGE_KEYS.players,
       JSON.stringify(data)
     );
   },
 
+
   loadScoring() {
-    return JSON.parse(
-      localStorage.getItem("sotScoring") ||
-      JSON.stringify({
-        win: 10,
-        mvp: 5,
-        quadra: 8,
-        penta: 12,
-        ppcc: 5,
-        tank: 1,
-        dps: 1
-      })
-    );
+    try {
+      return {
+        ...DEFAULT_SCORING,
+        ...(JSON.parse(
+          localStorage.getItem(STORAGE_KEYS.scoring)
+        ) || {})
+      };
+    } catch {
+      return {
+        ...DEFAULT_SCORING
+      };
+    }
   },
 
   saveScoring(data) {
     localStorage.setItem(
-      "sotScoring",
+      STORAGE_KEYS.scoring,
       JSON.stringify(data)
     );
   },
 
+
   loadMatch() {
-    return Number(
-      localStorage.getItem("sotCurrentMatch")
-    ) || 1;
+    const number = Number(
+      localStorage.getItem(STORAGE_KEYS.match)
+    );
+
+    return number >= 1 ? number : 1;
   },
 
-  saveMatch(match) {
+  saveMatch(number) {
     localStorage.setItem(
-      "sotCurrentMatch",
-      String(match)
+      STORAGE_KEYS.match,
+      String(number)
     );
   },
 
-  loadTournamentStatus() {
-    return (
-      localStorage.getItem("sotTournamentStatus") ||
-      "LIVE"
+
+  loadHistory() {
+    try {
+      return JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.history)
+      ) || [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveHistory(data) {
+    localStorage.setItem(
+      STORAGE_KEYS.history,
+      JSON.stringify(data)
     );
   },
 
-  saveTournamentStatus(status) {
+
+  loadTournament() {
+    try {
+      return JSON.parse(
+        localStorage.getItem(STORAGE_KEYS.tournament)
+      ) || {
+        number: 1,
+        status: "LIVE"
+      };
+    } catch {
+      return {
+        number: 1,
+        status: "LIVE"
+      };
+    }
+  },
+
+  saveTournament(data) {
     localStorage.setItem(
-      "sotTournamentStatus",
-      status
+      STORAGE_KEYS.tournament,
+      JSON.stringify(data)
     );
   }
+
 };
 
 
-// ============================================================
-// DATA
-// ============================================================
+/* =========================================================
+   STATE
+   ========================================================= */
 
-let players =
-  Storage.loadPlayers();
+let players = Storage.loadPlayers();
 
-let scoring =
-  Storage.loadScoring();
+let scoring = Storage.loadScoring();
 
-let currentMatch =
-  Storage.loadMatch();
+let currentMatch = Storage.loadMatch();
 
-let tournamentStatus =
-  Storage.loadTournamentStatus();
+let tournament = Storage.loadTournament();
+
+let history = Storage.loadHistory();
+
+let isAdmin = false;
 
 
-// ============================================================
-// BASIC HELPERS
-// ============================================================
+/* =========================================================
+   HELPER
+   ========================================================= */
 
-function escapeHTML(value) {
+const $ = id => document.getElementById(id);
 
-  return String(value)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+
+/* =========================================================
+   START
+   ========================================================= */
+
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
+
+    loadScoringInputs();
+
+    setupEvents();
+
+    renderEverything();
+
+  }
+);
+
+
+/* =========================================================
+   EVENTS
+   ========================================================= */
+
+function setupEvents() {
+
+  $("loginBtn").addEventListener(
+    "click",
+    openLogin
+  );
+
+
+  $("logoutBtn").addEventListener(
+    "click",
+    logout
+  );
+
+
+  $("loginForm").addEventListener(
+    "submit",
+    login
+  );
+
+
+  $("playerForm").addEventListener(
+    "submit",
+    addPlayer
+  );
+
+
+  $("applyScoring").addEventListener(
+    "click",
+    applyScoring
+  );
+
+
+  $("updateLeaderboardBtn").addEventListener(
+    "click",
+    updateLeaderboard
+  );
+
+
+  $("newTournamentBtn").addEventListener(
+    "click",
+    newTournament
+  );
+
+
+  $("generateResultBtn").addEventListener(
+    "click",
+    generateResultImage
+  );
+
+
+  $("currentMatch").addEventListener(
+    "change",
+    event => {
+      setMatch(event.target.value);
+    }
+  );
+
+
+  $("search").addEventListener(
+    "input",
+    renderLeaderboard
+  );
+
 }
 
 
-// ============================================================
-// AUTH UI
-// ============================================================
-
-function updateAuthUI() {
-
-  const authStatus =
-    document.getElementById("authStatus");
-
-  const loginBtn =
-    document.getElementById("loginBtn");
-
-  const logoutBtn =
-    document.getElementById("logoutBtn");
-
-  const adminControls =
-    document.getElementById("adminControls");
-
-  const liveControl =
-    document.getElementById("liveControl");
-
-  if (authStatus) {
-    authStatus.textContent =
-      isAdmin ? "ADMIN" : "VIEWER";
-  }
-
-  if (loginBtn) {
-    loginBtn.style.display =
-      isAdmin ? "none" : "inline-block";
-  }
-
-  if (logoutBtn) {
-    logoutBtn.style.display =
-      isAdmin ? "inline-block" : "none";
-  }
-
-  if (adminControls) {
-    adminControls.style.display =
-      isAdmin ? "block" : "none";
-  }
-
-  if (liveControl) {
-    liveControl.style.display =
-      isAdmin ? "block" : "none";
-  }
-
-  document
-    .querySelectorAll(".admin-action")
-    .forEach(element => {
-
-      element.style.display =
-        isAdmin ? "" : "none";
-
-    });
-
-  updateMatchUI();
-  updateResultUI();
-}
-
-
-// ============================================================
-// LOGIN PANEL
-// ============================================================
+/* =========================================================
+   LOGIN
+   ========================================================= */
 
 function openLogin() {
 
-  const panel =
-    document.getElementById("loginPanel");
+  $("loginPanel").style.display = "block";
 
-  if (panel) {
-    panel.style.display = "block";
-  }
+  $("loginUsername").focus();
+
 }
 
 
-function closeLogin() {
+function login(event) {
 
-  const panel =
-    document.getElementById("loginPanel");
-
-  if (panel) {
-    panel.style.display = "none";
-  }
-}
+  event.preventDefault();
 
 
-// ============================================================
-// LOGIN
-// ============================================================
+  const username =
+    $("loginUsername").value.trim();
 
-function login(username, password) {
+
+  const password =
+    $("loginPassword").value;
+
 
   const valid =
     PROTOTYPE_ADMINS.some(
-      account =>
-        account.username === username &&
-        account.password === password
+      admin =>
+        admin.username === username &&
+        admin.password === password
     );
 
-  const message =
-    document.getElementById("loginMessage");
 
   if (!valid) {
 
-    if (message) {
+    $("loginMessage").style.display =
+      "block";
 
-      message.textContent =
-        "Invalid username or password.";
+    $("loginMessage").textContent =
+      "Invalid username or password.";
 
-      message.style.display =
-        "block";
-    }
+    $("loginMessage").style.color =
+      "#ff5260";
 
-    return false;
+    return;
+
   }
+
 
   isAdmin = true;
 
-  localStorage.setItem(
-    "sotAdminLoggedIn",
-    "true"
-  );
 
-  if (message) {
-    message.style.display = "none";
-  }
+  $("loginPanel").style.display =
+    "none";
 
-  closeLogin();
 
-  updateAuthUI();
+  $("adminControls").style.display =
+    "grid";
 
-  render();
 
-  return true;
+  $("loginBtn").style.display =
+    "none";
+
+
+  $("logoutBtn").style.display =
+    "inline-block";
+
+
+  $("authStatus").textContent =
+    "ADMIN";
+
+
+  $("loginForm").reset();
+
+
+  $("loginMessage").style.display =
+    "none";
+
+
+  renderEverything();
+
 }
 
-
-// ============================================================
-// LOGOUT
-// ============================================================
 
 function logout() {
 
   isAdmin = false;
 
-  localStorage.removeItem(
-    "sotAdminLoggedIn"
-  );
 
-  closeLogin();
+  $("adminControls").style.display =
+    "none";
 
-  updateAuthUI();
 
-  render();
+  $("loginBtn").style.display =
+    "inline-block";
+
+
+  $("logoutBtn").style.display =
+    "none";
+
+
+  $("authStatus").textContent =
+    "VIEWER";
+
+
+  $("loginPanel").style.display =
+    "none";
+
+
+  renderEverything();
+
 }
 
 
-// ============================================================
-// SCORE CALCULATION
-// ============================================================
+/* =========================================================
+   PLAYER
+   ========================================================= */
 
-function calculateScore(player) {
+function createPlayer(name) {
 
-  return (
-    Number(player.win || 0) *
-      Number(scoring.win || 0) +
+  return {
 
-    Number(player.mvp || 0) *
-      Number(scoring.mvp || 0) +
+    id:
+      typeof crypto !== "undefined" &&
+      typeof crypto.randomUUID === "function"
 
-    Number(player.quadra || 0) *
-      Number(scoring.quadra || 0) +
+        ? crypto.randomUUID()
 
-    Number(player.penta || 0) *
-      Number(scoring.penta || 0) +
+        : Date.now().toString(),
 
-    Number(player.ppcc || 0) *
-      Number(scoring.ppcc || 0) +
+    name,
 
-    Number(player.tank || 0) *
-      Number(scoring.tank || 0) +
+    achievements: {
 
-    Number(player.dps || 0) *
-      Number(scoring.dps || 0)
-  );
-}
+      win: 0,
 
+      mvp: 0,
 
-// ============================================================
-// PLAYER STORAGE
-// ============================================================
+      quadra: 0,
 
-function savePlayers() {
+      penta: 0,
 
-  Storage.savePlayers(players);
-}
+      ppcc: 0,
 
+      tank: 0,
 
-// ============================================================
-// ADD PLAYER
-// ============================================================
+      dps: 0
 
-function addPlayer(name) {
+    },
 
-  if (!isAdmin) {
+    score: 0,
 
-    alert("Admin access required.");
+    updatedAt:
+      new Date().toISOString()
 
-    return;
-  }
-
-  const playerName =
-    name.trim();
-
-  if (!playerName) {
-    return;
-  }
-
-  const player = {
-
-    id: Date.now(),
-
-    name: playerName,
-
-    win: 0,
-    mvp: 0,
-    quadra: 0,
-    penta: 0,
-    ppcc: 0,
-    tank: 0,
-    dps: 0
   };
 
-  players.push(player);
-
-  savePlayers();
-
-  render();
 }
 
 
-// ============================================================
-// EDIT PLAYER
-// ============================================================
+function addPlayer(event) {
+
+  event.preventDefault();
+
+
+  if (!isAdmin) return;
+
+
+  const name =
+    $("playerName").value.trim();
+
+
+  if (!name) return;
+
+
+  const exists =
+    players.some(
+      player =>
+        player.name.toLowerCase() ===
+        name.toLowerCase()
+    );
+
+
+  if (exists) {
+
+    alert(
+      "Player already exists."
+    );
+
+    return;
+
+  }
+
+
+  players.push(
+    createPlayer(name)
+  );
+
+
+  recalculateScores();
+
+
+  Storage.savePlayers(
+    players
+  );
+
+
+  $("playerForm").reset();
+
+
+  renderEverything();
+
+}
+
 
 function editPlayer(id) {
 
-  if (!isAdmin) {
+  if (!isAdmin) return;
 
-    alert("Admin access required.");
-
-    return;
-  }
 
   const player =
     players.find(
       p => p.id === id
     );
 
-  if (!player) {
-    return;
-  }
 
-  const newName =
+  if (!player) return;
+
+
+  const name =
     prompt(
-      "Edit player name:",
+      "Enter new player name:",
       player.name
     );
 
-  if (
-    !newName ||
-    !newName.trim()
-  ) {
+
+  if (name === null) return;
+
+
+  const cleaned =
+    name.trim();
+
+
+  if (!cleaned) return;
+
+
+  const duplicate =
+    players.some(
+      p =>
+        p.id !== id &&
+        p.name.toLowerCase() ===
+        cleaned.toLowerCase()
+    );
+
+
+  if (duplicate) {
+
+    alert(
+      "Player already exists."
+    );
+
     return;
+
   }
 
-  player.name =
-    newName.trim();
 
-  savePlayers();
+  player.name = cleaned;
 
-  render();
+
+  player.updatedAt =
+    new Date().toISOString();
+
+
+  Storage.savePlayers(
+    players
+  );
+
+
+  renderEverything();
+
 }
 
 
-// ============================================================
-// DELETE PLAYER
-// ============================================================
-
 function deletePlayer(id) {
 
-  if (!isAdmin) {
+  if (!isAdmin) return;
 
-    alert("Admin access required.");
-
-    return;
-  }
 
   const player =
     players.find(
       p => p.id === id
     );
 
-  if (!player) {
-    return;
-  }
 
-  const confirmed =
-    confirm(
+  if (!player) return;
+
+
+  if (
+    !confirm(
       `Delete ${player.name}?`
-    );
+    )
+  ) return;
 
-  if (!confirmed) {
-    return;
-  }
 
   players =
     players.filter(
       p => p.id !== id
     );
 
-  savePlayers();
 
-  render();
+  Storage.savePlayers(
+    players
+  );
+
+
+  renderEverything();
+
 }
 
 
-// ============================================================
-// ACHIEVEMENT + / -
-// ============================================================
+/* =========================================================
+   SCORING
+   ========================================================= */
+
+function calculateScore(player) {
+
+  const a =
+    player.achievements;
+
+
+  return (
+
+    a.win * scoring.win +
+
+    a.mvp * scoring.mvp +
+
+    a.quadra * scoring.quadra +
+
+    a.penta * scoring.penta +
+
+    a.ppcc * scoring.ppcc +
+
+    a.tank * scoring.tank +
+
+    a.dps * scoring.dps
+
+  );
+
+}
+
+
+function recalculateScores() {
+
+  players.forEach(
+    player => {
+
+      player.score =
+        calculateScore(player);
+
+    }
+  );
+
+}
+
 
 function changeAchievement(
   playerId,
-  achievement,
+  type,
   amount
 ) {
 
-  if (!isAdmin) {
-    return;
-  }
+  if (!isAdmin) return;
+
 
   const player =
     players.find(
       p => p.id === playerId
     );
 
-  if (!player) {
-    return;
-  }
 
-  player[achievement] =
-    Number(player[achievement] || 0) +
-    amount;
-
-  if (player[achievement] < 0) {
-    player[achievement] = 0;
-  }
-
-  savePlayers();
-
-  render();
-}
+  if (!player) return;
 
 
-// ============================================================
-// ACHIEVEMENT CONTROL
-// ============================================================
+  if (
+    !Object.prototype.hasOwnProperty.call(
+      player.achievements,
+      type
+    )
+  ) return;
 
-function achievementControl(
-  player,
-  achievement
-) {
 
-  const value =
-    Number(
-      player[achievement] || 0
+  player.achievements[type] =
+    Math.max(
+      0,
+      player.achievements[type] +
+        amount
     );
 
-  if (!isAdmin) {
 
-    return `
-      <span class="achievement-value">
-        ${value}
-      </span>
-    `;
+  player.score =
+    calculateScore(player);
+
+
+  player.updatedAt =
+    new Date().toISOString();
+
+
+  Storage.savePlayers(
+    players
+  );
+
+
+  renderEverything();
+
+}
+
+
+/* =========================================================
+   SCORING SETTINGS
+   ========================================================= */
+
+function loadScoringInputs() {
+
+  $("winPoints").value =
+    scoring.win;
+
+
+  $("mvpPoints").value =
+    scoring.mvp;
+
+
+  $("quadraPoints").value =
+    scoring.quadra;
+
+
+  $("pentaPoints").value =
+    scoring.penta;
+
+
+  $("ppccPoints").value =
+    scoring.ppcc;
+
+
+  $("tankPoints").value =
+    scoring.tank;
+
+
+  $("dpsPoints").value =
+    scoring.dps;
+
+}
+
+
+function getNumber(id) {
+
+  const value =
+    Number($(id).value);
+
+
+  if (
+    Number.isFinite(value) &&
+    value >= 0
+  ) {
+
+    return Math.floor(value);
+
   }
 
-  return `
-    <div class="achievement-control">
 
-      <button
-        type="button"
-        onclick="changeAchievement(${player.id}, '${achievement}', -1)"
-      >
-        −
-      </button>
+  return 0;
 
-      <span class="achievement-value">
-        ${value}
-      </span>
-
-      <button
-        type="button"
-        onclick="changeAchievement(${player.id}, '${achievement}', 1)"
-      >
-        +
-      </button>
-
-    </div>
-  `;
-}
-
-
-// ============================================================
-// SCORING SETTINGS
-// ============================================================
-
-function getScoringInputs() {
-
-  return {
-
-    win:
-      document.getElementById("winPoints"),
-
-    mvp:
-      document.getElementById("mvpPoints"),
-
-    quadra:
-      document.getElementById("quadraPoints"),
-
-    penta:
-      document.getElementById("pentaPoints"),
-
-    ppcc:
-      document.getElementById("ppccPoints"),
-
-    tank:
-      document.getElementById("tankPoints"),
-
-    dps:
-      document.getElementById("dpsPoints")
-  };
-}
-
-
-function loadScoringSettings() {
-
-  const inputs =
-    getScoringInputs();
-
-  Object.keys(inputs)
-    .forEach(key => {
-
-      if (inputs[key]) {
-
-        inputs[key].value =
-          scoring[key];
-
-      }
-
-    });
 }
 
 
 function applyScoring() {
 
-  if (!isAdmin) {
+  if (!isAdmin) return;
 
-    alert("Admin access required.");
 
-    return;
-  }
+  scoring = {
 
-  const inputs =
-    getScoringInputs();
+    win:
+      getNumber("winPoints"),
 
-  Object.keys(inputs)
-    .forEach(key => {
+    mvp:
+      getNumber("mvpPoints"),
 
-      if (!inputs[key]) {
-        return;
-      }
+    quadra:
+      getNumber("quadraPoints"),
 
-      let value =
-        parseFloat(
-          inputs[key].value
-        );
+    penta:
+      getNumber("pentaPoints"),
 
-      if (
-        isNaN(value) ||
-        value < 0
-      ) {
-        value = 0;
-      }
+    ppcc:
+      getNumber("ppccPoints"),
 
-      scoring[key] =
-        value;
-    });
+    tank:
+      getNumber("tankPoints"),
+
+    dps:
+      getNumber("dpsPoints")
+
+  };
+
 
   Storage.saveScoring(
     scoring
   );
 
-  loadScoringSettings();
 
-  render();
-}
+  recalculateScores();
 
 
-// ============================================================
-// LIVE CONTROL
-// ============================================================
-
-function updateMatchUI() {
-
-  const input =
-    document.getElementById(
-      "currentMatch"
-    );
-
-  if (input) {
-
-    input.value =
-      currentMatch;
-  }
-
-  const displays =
-    document.querySelectorAll(
-      "#liveMatchDisplay"
-    );
-
-  displays.forEach(
-    liveDisplay => {
-
-      if (
-        tournamentStatus ===
-        "FINAL"
-      ) {
-
-        liveDisplay.textContent =
-          `🏁 FINAL — MATCH ${currentMatch}`;
-
-      } else {
-
-        liveDisplay.textContent =
-          `🔴 LIVE — MATCH ${currentMatch}`;
-
-      }
-
-    }
-  );
-}
-
-
-// ============================================================
-// SET MATCH
-// ============================================================
-
-function setMatch(value) {
-
-  if (!isAdmin) {
-
-    updateMatchUI();
-
-    return;
-  }
-
-  let match =
-    parseInt(
-      value,
-      10
-    );
-
-  if (
-    isNaN(match) ||
-    match < 1
-  ) {
-
-    match = 1;
-  }
-
-  currentMatch =
-    match;
-
-  Storage.saveMatch(
-    currentMatch
+  Storage.savePlayers(
+    players
   );
 
-  updateMatchUI();
 
-  render();
+  renderEverything();
+
+
+  alert(
+    "Scoring updated successfully."
+  );
+
 }
 
 
-// ============================================================
-// CHANGE MATCH
-// ============================================================
+/* =========================================================
+   LIVE MATCH
+   ========================================================= */
 
 function changeMatch(amount) {
 
-  if (!isAdmin) {
-    return;
-  }
+  if (!isAdmin) return;
 
-  currentMatch +=
-    amount;
 
-  if (
-    currentMatch < 1
-  ) {
+  currentMatch =
+    Math.max(
+      1,
+      currentMatch + amount
+    );
 
-    currentMatch = 1;
-  }
 
   Storage.saveMatch(
     currentMatch
   );
 
-  updateMatchUI();
 
-  render();
+  updateMatchDisplay();
+
 }
 
 
-// ============================================================
-// FINALIZE TOURNAMENT
-// ============================================================
+function setMatch(value) {
 
-function finalizeTournament() {
+  if (!isAdmin) return;
 
-  if (!isAdmin) {
 
-    alert("Admin access required.");
-
-    return;
-  }
-
-  if (
-    tournamentStatus ===
-    "FINAL"
-  ) {
-
-    alert(
-      "This tournament is already finalized."
+  const number =
+    Math.floor(
+      Number(value)
     );
 
-    return;
-  }
 
-  const confirmed =
-    confirm(
-      "Finalize this tournament?\n\n" +
-      "The tournament status will change from LIVE to FINAL."
+  currentMatch =
+    Math.max(
+      1,
+      Number.isFinite(number)
+        ? number
+        : 1
     );
 
-  if (!confirmed) {
-    return;
-  }
 
-  tournamentStatus =
-    "FINAL";
-
-  Storage.saveTournamentStatus(
-    tournamentStatus
+  Storage.saveMatch(
+    currentMatch
   );
 
-  updateMatchUI();
 
-  render();
+  updateMatchDisplay();
 
-  alert(
-    "Tournament finalized."
-  );
 }
 
 
-// ============================================================
-// SORTED PLAYER DATA
-// ============================================================
+function updateMatchDisplay() {
 
-function getSortedPlayers() {
+  $("currentMatch").value =
+    currentMatch;
 
-  return [...players]
 
-    .map(player => ({
+  $("adminLiveMatchDisplay").textContent =
+    `LIVE — MATCH ${currentMatch}`;
 
-      ...player,
 
-      score:
-        calculateScore(player)
+  $("viewerLiveMatchDisplay").textContent =
+    `LIVE — MATCH ${currentMatch}`;
 
-    }))
-
-    .sort(
-      (a, b) =>
-        b.score - a.score
-    );
 }
 
 
-// ============================================================
-// SECTION 5A — TOP 5 PLAYERS
-// ============================================================
+/* =========================================================
+   LEADERBOARD
+   ========================================================= */
 
-function renderTopFive() {
+function updateLeaderboard() {
 
-  const container =
-    document.getElementById(
-      "topFiveList"
-    );
+  if (!isAdmin) return;
 
-  if (!container) {
-    return;
-  }
 
-  const sortedPlayers =
-    getSortedPlayers();
+  recalculateScores();
 
-  container.innerHTML = "";
 
-  if (
-    sortedPlayers.length === 0
-  ) {
+  players.sort(
+    (a, b) => {
 
-    container.innerHTML = `
-      <div class="top-five-empty">
-        No players yet.
-      </div>
-    `;
+      const scoreDifference =
+        b.score - a.score;
 
-    return;
-  }
 
-  sortedPlayers
-    .slice(0, 5)
-    .forEach(
-      (player, index) => {
+      if (
+        scoreDifference !== 0
+      ) {
 
-        const card =
-          document.createElement(
-            "div"
-          );
+        return scoreDifference;
 
-        card.className =
-          "top-five-card";
-
-        card.innerHTML = `
-
-          <div class="top-five-rank">
-            #${index + 1}
-          </div>
-
-          <div class="top-five-player">
-
-            <strong>
-              ${escapeHTML(
-                player.name
-              )}
-            </strong>
-
-            <span>
-              ${player.win || 0} WIN
-              ·
-              ${player.mvp || 0} MVP
-            </span>
-
-          </div>
-
-          <div class="top-five-score">
-
-            <span>
-              SCORE
-            </span>
-
-            <strong>
-              ${player.score}
-            </strong>
-
-          </div>
-
-        `;
-
-        container.appendChild(
-          card
-        );
       }
-    );
-}
 
 
-// ============================================================
-// LEADERBOARD
-// ============================================================
-
-function renderLeaderboard() {
-
-  const tbody =
-    document.getElementById(
-      "leaderboard"
-    );
-
-  const emptyState =
-    document.getElementById(
-      "emptyState"
-    );
-
-  if (!tbody) {
-    return;
-  }
-
-  const sortedPlayers =
-    getSortedPlayers();
-
-  tbody.innerHTML = "";
-
-  if (
-    sortedPlayers.length === 0
-  ) {
-
-    if (emptyState) {
-
-      emptyState.style.display =
-        "block";
-    }
-
-    return;
-  }
-
-  if (emptyState) {
-
-    emptyState.style.display =
-      "none";
-  }
-
-  sortedPlayers.forEach(
-    (player, index) => {
-
-      const row =
-        document.createElement(
-          "tr"
-        );
-
-      row.innerHTML = `
-
-        <td>
-          ${index + 1}
-        </td>
-
-        <td>
-          <strong>
-            ${escapeHTML(
-              player.name
-            )}
-          </strong>
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "win"
-          )}
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "mvp"
-          )}
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "quadra"
-          )}
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "penta"
-          )}
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "ppcc"
-          )}
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "tank"
-          )}
-        </td>
-
-        <td>
-          ${achievementControl(
-            player,
-            "dps"
-          )}
-        </td>
-
-        <td>
-          <strong>
-            ${player.score}
-          </strong>
-        </td>
-
-        <td class="admin-action">
-
-          <button
-            type="button"
-            onclick="editPlayer(${player.id})"
-          >
-            EDIT
-          </button>
-
-          <button
-            type="button"
-            onclick="deletePlayer(${player.id})"
-          >
-            DELETE
-          </button>
-
-        </td>
-
-      `;
-
-      tbody.appendChild(
-        row
+      return a.name.localeCompare(
+        b.name
       );
 
     }
   );
+
+
+  Storage.savePlayers(
+    players
+  );
+
+
+  renderEverything();
+
+
+  alert(
+    "Leaderboard updated."
+  );
+
 }
 
 
-// ============================================================
-// STATS
-// ============================================================
+/* =========================================================
+   NEW TOURNAMENT
+   ========================================================= */
+
+function newTournament() {
+
+  if (!isAdmin) return;
+
+
+  if (!players.length) {
+
+    alert(
+      "There are no players to archive."
+    );
+
+    return;
+
+  }
+
+
+  const confirmed =
+    confirm(
+      "Archive this tournament and start a new one?"
+    );
+
+
+  if (!confirmed) return;
+
+
+  recalculateScores();
+
+
+  const archivedTournament = {
+
+    id: Date.now(),
+
+    tournamentNumber:
+      tournament.number,
+
+    date:
+      new Date().toISOString(),
+
+    matchCount:
+      currentMatch,
+
+    players:
+      JSON.parse(
+        JSON.stringify(players)
+      )
+
+  };
+
+
+  history.unshift(
+    archivedTournament
+  );
+
+
+  tournament = {
+
+    number:
+      tournament.number + 1,
+
+    status:
+      "LIVE"
+
+  };
+
+
+  players = [];
+
+  currentMatch = 1;
+
+
+  Storage.saveHistory(
+    history
+  );
+
+
+  Storage.saveTournament(
+    tournament
+  );
+
+
+  Storage.savePlayers(
+    players
+  );
+
+
+  Storage.saveMatch(
+    currentMatch
+  );
+
+
+  renderEverything();
+
+
+  alert(
+    `Tournament ${archivedTournament.tournamentNumber} archived.`
+  );
+
+}
+
+
+/* =========================================================
+   STATS
+   ========================================================= */
 
 function renderStats() {
 
-  const totalPlayers =
-    document.getElementById(
-      "totalPlayers"
+  $("totalPlayers").textContent =
+    players.length;
+
+
+  const sorted =
+    [...players].sort(
+      (a, b) =>
+        b.score - a.score
     );
 
-  const topScore =
-    document.getElementById(
-      "topScore"
-    );
 
-  const leaderName =
-    document.getElementById(
-      "leaderName"
-    );
+  if (!sorted.length) {
 
-  const sortedPlayers =
-    getSortedPlayers();
+    $("topScore").textContent =
+      "0";
 
-  if (totalPlayers) {
 
-    totalPlayers.textContent =
-      players.length;
-  }
+    $("leaderName").textContent =
+      "—";
 
-  if (
-    sortedPlayers.length === 0
-  ) {
-
-    if (topScore) {
-      topScore.textContent =
-        "0";
-    }
-
-    if (leaderName) {
-      leaderName.textContent =
-        "—";
-    }
 
     return;
+
   }
 
-  if (topScore) {
 
-    topScore.textContent =
-      sortedPlayers[0].score;
-  }
+  $("topScore").textContent =
+    sorted[0].score;
 
-  if (leaderName) {
 
-    leaderName.textContent =
-      sortedPlayers[0].name;
-  }
+  $("leaderName").textContent =
+    sorted[0].name;
+
 }
 
 
-// ============================================================
-// SEARCH
-// ============================================================
+/* =========================================================
+   LEADERBOARD RENDER
+   ========================================================= */
 
-function searchPlayers() {
+function achievementCell(
+  player,
+  type
+) {
 
-  const input =
-    document.getElementById(
-      "search"
-    );
+  const value =
+    player.achievements[type];
 
-  const query =
-    input
-      ? input.value
-        .trim()
-        .toLowerCase()
-      : "";
-
-  const rows =
-    document.querySelectorAll(
-      "#leaderboard tr"
-    );
-
-  rows.forEach(
-    row => {
-
-      const name =
-        row
-          .cells[1]
-          ?.textContent
-          .toLowerCase() || "";
-
-      row.style.display =
-        name.includes(query)
-          ? ""
-          : "none";
-
-    }
-  );
-}
-
-
-// ============================================================
-// SECTION 4 — RESULT CONTROL
-// ============================================================
-
-function updateResultUI() {
-
-  const resultControl =
-    document.getElementById(
-      "resultControl"
-    );
-
-  if (!resultControl) {
-    return;
-  }
-
-  resultControl.style.display =
-    tournamentStatus === "FINAL" &&
-    isAdmin
-      ? "block"
-      : "none";
-}
-
-
-function generateResultImage() {
 
   if (!isAdmin) {
 
+    return `
+      <td>
+        ${value}
+      </td>
+    `;
+
+  }
+
+
+  return `
+
+    <td>
+
+      <div class="achievement-control">
+
+        <button
+          type="button"
+          onclick="
+            changeAchievement(
+              '${player.id}',
+              '${type}',
+              -1
+            )
+          "
+        >
+          −
+        </button>
+
+
+        <strong>
+          ${value}
+        </strong>
+
+
+        <button
+          type="button"
+          onclick="
+            changeAchievement(
+              '${player.id}',
+              '${type}',
+              1
+            )
+          "
+        >
+          +
+        </button>
+
+      </div>
+
+    </td>
+
+  `;
+
+}
+
+
+function renderLeaderboard() {
+
+  const tbody =
+    $("leaderboard");
+
+
+  const search =
+    $("search")
+      .value
+      .trim()
+      .toLowerCase();
+
+
+  const sorted =
+    [...players].sort(
+      (a, b) => {
+
+        const scoreDifference =
+          b.score - a.score;
+
+
+        if (
+          scoreDifference !== 0
+        ) {
+
+          return scoreDifference;
+
+        }
+
+
+        return a.name.localeCompare(
+          b.name
+        );
+
+      }
+    );
+
+
+  const filtered =
+    sorted.filter(
+      player =>
+        player.name
+          .toLowerCase()
+          .includes(search)
+    );
+
+
+  $("emptyState").style.display =
+    players.length === 0
+      ? "block"
+      : "none";
+
+
+  if (!filtered.length) {
+
+    tbody.innerHTML =
+      "";
+
+    return;
+
+  }
+
+
+  tbody.innerHTML =
+    filtered
+      .map(
+        player => {
+
+          const rank =
+            sorted.findIndex(
+              p =>
+                p.id === player.id
+            ) + 1;
+
+
+          return `
+
+            <tr>
+
+              <td>
+                #${rank}
+              </td>
+
+
+              <td>
+                ${escapeHTML(
+                  player.name
+                )}
+              </td>
+
+
+              ${achievementCell(
+                player,
+                "win"
+              )}
+
+
+              ${achievementCell(
+                player,
+                "mvp"
+              )}
+
+
+              ${achievementCell(
+                player,
+                "quadra"
+              )}
+
+
+              ${achievementCell(
+                player,
+                "penta"
+              )}
+
+
+              ${achievementCell(
+                player,
+                "ppcc"
+              )}
+
+
+              ${achievementCell(
+                player,
+                "tank"
+              )}
+
+
+              ${achievementCell(
+                player,
+                "dps"
+              )}
+
+
+              <td>
+                ${player.score}
+              </td>
+
+
+              <td>
+
+                ${
+                  isAdmin
+
+                    ? `
+
+                      <button
+                        type="button"
+                        onclick="
+                          editPlayer(
+                            '${player.id}'
+                          )
+                        "
+                      >
+                        EDIT
+                      </button>
+
+
+                      <button
+                        type="button"
+                        onclick="
+                          deletePlayer(
+                            '${player.id}'
+                          )
+                        "
+                      >
+                        DELETE
+                      </button>
+
+                    `
+
+                    : "—"
+                }
+
+              </td>
+
+            </tr>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   TOP 5
+   ========================================================= */
+
+function renderTopFive() {
+
+  const container =
+    $("topFiveList");
+
+
+  const top =
+    [...players]
+      .sort(
+        (a, b) =>
+          b.score - a.score
+      )
+      .slice(0, 5);
+
+
+  if (!top.length) {
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+
+        <h3>
+          NO PLAYERS YET
+        </h3>
+
+        <p>
+          Players will appear here once they are added.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    top
+      .map(
+        (player, index) => `
+
+          <div class="top-player-card">
+
+            <div class="top-player-rank">
+              #${index + 1}
+            </div>
+
+
+            <div class="top-player-name">
+              ${escapeHTML(
+                player.name
+              )}
+            </div>
+
+
+            <div class="top-player-score">
+              ${player.score}
+            </div>
+
+          </div>
+
+        `
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   HISTORY
+   ========================================================= */
+
+function renderHistory() {
+
+  const container =
+    $("historyList");
+
+
+  if (!history.length) {
+
+    container.innerHTML = `
+
+      <div class="empty-state">
+
+        <h3>
+          NO TOURNAMENT HISTORY
+        </h3>
+
+        <p>
+          Previous tournaments will appear here.
+        </p>
+
+      </div>
+
+    `;
+
+    return;
+
+  }
+
+
+  container.innerHTML =
+    history
+      .map(
+        tournamentData => {
+
+          const sorted =
+            [...tournamentData.players]
+              .sort(
+                (a, b) =>
+                  b.score - a.score
+              );
+
+
+          const leader =
+            sorted[0];
+
+
+          return `
+
+            <div class="history-card">
+
+              <div>
+
+                <strong>
+                  TOURNAMENT
+                  ${tournamentData.tournamentNumber}
+                </strong>
+
+
+                <span>
+
+                  ${formatDate(
+                    tournamentData.date
+                  )}
+
+                  ·
+
+                  ${tournamentData.matchCount}
+
+                  match${
+                    tournamentData.matchCount === 1
+                      ? ""
+                      : "es"
+                  }
+
+                </span>
+
+              </div>
+
+
+              <div>
+
+                <strong>
+
+                  ${
+                    leader
+                      ? escapeHTML(
+                          leader.name
+                        )
+                      : "—"
+                  }
+
+                </strong>
+
+
+                <span>
+
+                  ${
+                    leader
+                      ? leader.score
+                      : 0
+                  }
+
+                  SOT
+
+                </span>
+
+              </div>
+
+            </div>
+
+          `;
+
+        }
+      )
+      .join("");
+
+}
+
+
+/* =========================================================
+   RESULT IMAGE
+   ========================================================= */
+
+function generateResultImage() {
+
+  if (!isAdmin) return;
+
+
+  if (!players.length) {
+
     alert(
-      "Admin access required."
+      "Add players before generating the result."
     );
 
     return;
+
   }
 
-  if (
-    tournamentStatus !==
-    "FINAL"
-  ) {
 
-    alert(
-      "Finalize the tournament first."
+  recalculateScores();
+
+
+  const sorted =
+    [...players].sort(
+      (a, b) =>
+        b.score - a.score
     );
 
-    return;
-  }
-
-  const sortedPlayers =
-    getSortedPlayers();
-
-  if (
-    sortedPlayers.length === 0
-  ) {
-
-    alert(
-      "There are no players to include."
-    );
-
-    return;
-  }
 
   const canvas =
     document.createElement(
       "canvas"
     );
 
-  canvas.width = 1600;
-  canvas.height = 1000;
+
+  canvas.width =
+    1600;
+
+
+  canvas.height =
+    Math.max(
+      900,
+      420 + sorted.length * 90
+    );
+
 
   const ctx =
     canvas.getContext(
@@ -1240,33 +1548,11 @@ function generateResultImage() {
     );
 
 
-  // Background
-
-  const gradient =
-    ctx.createLinearGradient(
-      0,
-      0,
-      1600,
-      1000
-    );
-
-  gradient.addColorStop(
-    0,
-    "#080a0f"
-  );
-
-  gradient.addColorStop(
-    0.55,
-    "#11151d"
-  );
-
-  gradient.addColorStop(
-    1,
-    "#210b12"
-  );
+  /* Background */
 
   ctx.fillStyle =
-    gradient;
+    "#07090d";
+
 
   ctx.fillRect(
     0,
@@ -1276,559 +1562,256 @@ function generateResultImage() {
   );
 
 
-  // Red glow
-
-  const glow =
-    ctx.createRadialGradient(
-      150,
-      100,
-      20,
-      150,
-      100,
-      500
-    );
-
-  glow.addColorStop(
-    0,
-    "rgba(255,63,79,0.25)"
-  );
-
-  glow.addColorStop(
-    1,
-    "rgba(255,63,79,0)"
-  );
+  /* Red top bar */
 
   ctx.fillStyle =
-    glow;
+    "#e3263f";
+
 
   ctx.fillRect(
     0,
     0,
-    700,
-    600
+    canvas.width,
+    18
   );
 
 
-  // Orange glow
-
-  const orangeGlow =
-    ctx.createRadialGradient(
-      1450,
-      850,
-      20,
-      1450,
-      850,
-      500
-    );
-
-  orangeGlow.addColorStop(
-    0,
-    "rgba(255,157,61,0.18)"
-  );
-
-  orangeGlow.addColorStop(
-    1,
-    "rgba(255,157,61,0)"
-  );
+  /* Orange bottom bar */
 
   ctx.fillStyle =
-    orangeGlow;
+    "#ff8a24";
+
 
   ctx.fillRect(
-    900,
-    500,
-    700,
-    500
+    0,
+    canvas.height - 12,
+    canvas.width,
+    12
   );
 
 
-  // Title
+  /* Title */
 
   ctx.fillStyle =
-    "#ffffff";
+    "#f5f7fa";
+
 
   ctx.font =
-    "900 58px Arial";
+    "900 62px Arial";
+
 
   ctx.fillText(
     "SOT SCOREBOARD",
-    90,
-    105
+    80,
+    110
   );
 
 
+  /* Subtitle */
+
   ctx.fillStyle =
-    "#9da6b5";
+    "#ff8a24";
+
 
   ctx.font =
-    "600 24px Arial";
+    "900 26px Arial";
+
 
   ctx.fillText(
     "SATURDAY OPEN TOURNAMENT",
-    94,
-    145
+    84,
+    155
   );
 
 
-  // Final badge
-
-  ctx.fillStyle =
-    "#ff3f4f";
-
-  ctx.beginPath();
-
-  ctx.roundRect(
-    1240,
-    70,
-    270,
-    58,
-    29
-  );
-
-  ctx.fill();
+  let y = 240;
 
 
-  ctx.fillStyle =
-    "#ffffff";
+  sorted.forEach(
+    (player, index) => {
 
-  ctx.font =
-    "900 23px Arial";
+      /* Row */
 
-  ctx.fillText(
-    `🏁 FINAL — MATCH ${currentMatch}`,
-    1270,
-    107
-  );
+      ctx.fillStyle =
+        index % 2 === 0
+          ? "#11161e"
+          : "#0d1118";
 
 
-  // Divider
-
-  const divider =
-    ctx.createLinearGradient(
-      90,
-      0,
-      1510,
-      0
-    );
-
-  divider.addColorStop(
-    0,
-    "#ff3f4f"
-  );
-
-  divider.addColorStop(
-    0.5,
-    "#ff9d3d"
-  );
-
-  divider.addColorStop(
-    1,
-    "rgba(255,255,255,0)"
-  );
-
-  ctx.fillStyle =
-    divider;
-
-  ctx.fillRect(
-    90,
-    180,
-    1420,
-    3
-  );
+      ctx.fillRect(
+        70,
+        y - 48,
+        1460,
+        70
+      );
 
 
-  // Table header
+      /* Rank */
 
-  ctx.fillStyle =
-    "rgba(255,255,255,0.08)";
+      ctx.fillStyle =
+        index === 0
+          ? "#ffb04a"
+          : "#f5f7fa";
 
-  ctx.fillRect(
-    90,
-    220,
-    1420,
-    55
+
+      ctx.font =
+        "900 30px Arial";
+
+
+      ctx.fillText(
+        `#${index + 1}`,
+        95,
+        y
+      );
+
+
+      /* Player */
+
+      ctx.fillStyle =
+        "#f5f7fa";
+
+
+      ctx.fillText(
+        player.name,
+        190,
+        y
+      );
+
+
+      /* Score */
+
+      ctx.fillStyle =
+        "#ff8a24";
+
+
+      ctx.fillText(
+        String(player.score),
+        1390,
+        y
+      );
+
+
+      y += 90;
+
+    }
   );
 
 
-  ctx.fillStyle =
-    "#aeb6c4";
-
-  ctx.font =
-    "800 18px Arial";
-
-  ctx.fillText(
-    "RANK",
-    120,
-    255
-  );
-
-  ctx.fillText(
-    "PLAYER",
-    260,
-    255
-  );
-
-  ctx.fillText(
-    "WIN",
-    800,
-    255
-  );
-
-  ctx.fillText(
-    "MVP",
-    900,
-    255
-  );
-
-  ctx.fillText(
-    "QUADRA",
-    1000,
-    255
-  );
-
-  ctx.fillText(
-    "PENTA",
-    1120,
-    255
-  );
-
-  ctx.fillText(
-    "SCORE",
-    1360,
-    255
-  );
-
-
-  // Rows
-
-  const maxRows = 10;
-
-  sortedPlayers
-    .slice(
-      0,
-      maxRows
-    )
-    .forEach(
-      (player, index) => {
-
-        const y =
-          275 +
-          index * 62;
-
-
-        if (
-          index % 2 === 0
-        ) {
-
-          ctx.fillStyle =
-            "rgba(255,255,255,0.025)";
-
-          ctx.fillRect(
-            90,
-            y,
-            1420,
-            62
-          );
-        }
-
-
-        ctx.fillStyle =
-          index === 0
-            ? "#ff9d3d"
-            : "#dfe3ea";
-
-        ctx.font =
-          "900 23px Arial";
-
-        ctx.fillText(
-          String(index + 1),
-          125,
-          y + 40
-        );
-
-
-        ctx.fillStyle =
-          "#ffffff";
-
-        ctx.font =
-          "800 21px Arial";
-
-        ctx.fillText(
-          String(
-            player.name
-          ).slice(
-            0,
-            28
-          ),
-          260,
-          y + 40
-        );
-
-
-        ctx.fillStyle =
-          "#cbd1da";
-
-        ctx.font =
-          "700 19px Arial";
-
-        ctx.fillText(
-          player.win || 0,
-          810,
-          y + 40
-        );
-
-        ctx.fillText(
-          player.mvp || 0,
-          910,
-          y + 40
-        );
-
-        ctx.fillText(
-          player.quadra || 0,
-          1020,
-          y + 40
-        );
-
-        ctx.fillText(
-          player.penta || 0,
-          1135,
-          y + 40
-        );
-
-
-        ctx.fillStyle =
-          "#ffc067";
-
-        ctx.font =
-          "900 24px Arial";
-
-        ctx.fillText(
-          String(
-            player.score
-          ),
-          1365,
-          y + 40
-        );
-
-      }
-    );
-
-
-  // Footer
-
-  ctx.fillStyle =
-    "#737c8b";
-
-  ctx.font =
-    "600 17px Arial";
-
-  ctx.fillText(
-    "SOT Scoreboard • Saturday Open Tournament",
-    90,
-    940
-  );
-
-
-  // Generate image
-
-  const image =
+  $("resultImage").src =
     canvas.toDataURL(
       "image/png"
     );
 
 
-  const preview =
-    document.getElementById(
-      "resultPreview"
-    );
+  $("resultPreview").style.display =
+    "block";
 
-  const imageElement =
-    document.getElementById(
-      "resultImage"
-    );
-
-
-  if (imageElement) {
-
-    imageElement.src =
-      image;
-  }
-
-  if (preview) {
-
-    preview.style.display =
-      "block";
-  }
-
-
-  const link =
-    document.createElement(
-      "a"
-    );
-
-  link.download =
-    `SOT-Final-Match-${currentMatch}.png`;
-
-  link.href =
-    image;
-
-  link.click();
 }
 
 
-// ============================================================
-// MAIN RENDER
-// ============================================================
+/* =========================================================
+   RENDER EVERYTHING
+   ========================================================= */
 
-function render() {
+function renderEverything() {
 
-  renderTopFive();
-
-  renderLeaderboard();
+  recalculateScores();
 
   renderStats();
 
-  updateAuthUI();
+  renderLeaderboard();
 
-  updateMatchUI();
+  renderTopFive();
 
-  updateResultUI();
+  renderHistory();
 
-  loadScoringSettings();
+  updateMatchDisplay();
 
-  searchPlayers();
 }
 
 
-// ============================================================
-// EVENT LISTENERS
-// ============================================================
+/* =========================================================
+   SECURITY / HTML ESCAPE
+   ========================================================= */
 
-// Login
+function escapeHTML(value) {
 
-document
-  .getElementById("loginBtn")
-  ?.addEventListener(
-    "click",
-    openLogin
-  );
+  return String(value)
+
+    .replaceAll(
+      "&",
+      "&amp;"
+    )
+
+    .replaceAll(
+      "<",
+      "&lt;"
+    )
+
+    .replaceAll(
+      ">",
+      "&gt;"
+    )
+
+    .replaceAll(
+      '"',
+      "&quot;"
+    )
+
+    .replaceAll(
+      "'",
+      "&#039;"
+    );
+
+}
 
 
-// Logout
+/* =========================================================
+   DATE
+   ========================================================= */
 
-document
-  .getElementById("logoutBtn")
-  ?.addEventListener(
-    "click",
-    logout
-  );
+function formatDate(
+  dateString
+) {
 
-
-// Login form
-
-document
-  .getElementById("loginForm")
-  ?.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const username =
-        document
-          .getElementById(
-            "loginUsername"
-          )
-          .value
-          .trim();
-
-      const password =
-        document
-          .getElementById(
-            "loginPassword"
-          )
-          .value;
-
-      login(
-        username,
-        password
-      );
-
+  return new Date(
+    dateString
+  ).toLocaleDateString(
+    undefined,
+    {
+      year: "numeric",
+      month: "short",
+      day: "numeric"
     }
   );
 
-
-// Add player
-
-document
-  .getElementById("playerForm")
-  ?.addEventListener(
-    "submit",
-    function(event) {
-
-      event.preventDefault();
-
-      const input =
-        document.getElementById(
-          "playerName"
-        );
-
-      if (!input) {
-        return;
-      }
-
-      addPlayer(
-        input.value
-      );
-
-      input.value = "";
-
-    }
-  );
+}
 
 
-// Apply scoring
+/* =========================================================
+   DEBUG / FUTURE SUPABASE LAYER
+   ========================================================= */
 
-document
-  .getElementById("applyScoring")
-  ?.addEventListener(
-    "click",
-    applyScoring
-  );
+window.SOT = {
 
+  getPlayers: () =>
+    players,
 
-// Search
+  getScoring: () =>
+    scoring,
 
-document
-  .getElementById("search")
-  ?.addEventListener(
-    "input",
-    searchPlayers
-  );
+  getHistory: () =>
+    history,
 
+  getMatch: () =>
+    currentMatch,
 
-// Generate result
+  resetAll() {
 
-document
-  .getElementById(
-    "generateResultBtn"
-  )
-  ?.addEventListener(
-    "click",
-    generateResultImage
-  );
+    localStorage.clear();
 
+    location.reload();
 
-// ============================================================
-// INITIALIZATION
-// ============================================================
+  }
 
-loadScoringSettings();
-
-updateAuthUI();
-
-updateMatchUI();
-
-updateResultUI();
-
-render();
+};
