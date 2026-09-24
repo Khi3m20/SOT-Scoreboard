@@ -1609,8 +1609,17 @@ function generateResultImage() {
 
   const sorted =
     [...players].sort(
-      (a, b) =>
-        b.score - a.score
+      (a, b) => {
+
+        if (b.score !== a.score) {
+          return b.score - a.score;
+        }
+
+        return a.name.localeCompare(
+          b.name
+        );
+
+      }
     );
 
 
@@ -1620,15 +1629,26 @@ function generateResultImage() {
     );
 
 
+  const width = 1800;
+
+  const headerHeight = 220;
+
+  const tableHeaderHeight = 80;
+
+  const rowHeight = 88;
+
+  const footerHeight = 70;
+
+
   canvas.width =
-    1600;
+    width;
 
 
   canvas.height =
-    Math.max(
-      900,
-      420 + sorted.length * 90
-    );
+    headerHeight +
+    tableHeaderHeight +
+    sorted.length * rowHeight +
+    footerHeight;
 
 
   const ctx =
@@ -1637,7 +1657,9 @@ function generateResultImage() {
     );
 
 
-  /* Background */
+  /* =====================================================
+     BACKGROUND
+     ===================================================== */
 
   ctx.fillStyle =
     "#07090d";
@@ -1651,7 +1673,7 @@ function generateResultImage() {
   );
 
 
-  /* Red top bar */
+  /* RED TOP BAR */
 
   ctx.fillStyle =
     "#e3263f";
@@ -1660,12 +1682,12 @@ function generateResultImage() {
   ctx.fillRect(
     0,
     0,
-    canvas.width,
+    width,
     18
   );
 
 
-  /* Orange bottom bar */
+  /* ORANGE BOTTOM BAR */
 
   ctx.fillStyle =
     "#ff8a24";
@@ -1674,52 +1696,223 @@ function generateResultImage() {
   ctx.fillRect(
     0,
     canvas.height - 12,
-    canvas.width,
+    width,
     12
   );
 
 
-  /* Title */
+  /* =====================================================
+     TITLE
+     ===================================================== */
+
+  ctx.textAlign =
+    "left";
+
 
   ctx.fillStyle =
     "#f5f7fa";
 
 
   ctx.font =
-    "900 62px Arial";
+    "900 58px Arial";
 
 
   ctx.fillText(
     "SOT SCOREBOARD",
-    80,
-    110
+    70,
+    85
   );
 
 
-  /* Subtitle */
+  /* SUBTITLE */
 
   ctx.fillStyle =
     "#ff8a24";
 
 
   ctx.font =
-    "900 26px Arial";
+    "900 25px Arial";
 
 
   ctx.fillText(
     "SATURDAY OPEN TOURNAMENT",
-    84,
-    155
+    73,
+    125
   );
 
 
-  let y = 240;
+  /* TOURNAMENT / MATCH */
 
+  ctx.fillStyle =
+    "#9aa4b2";
+
+
+  ctx.font =
+    "20px Arial";
+
+
+  ctx.fillText(
+    `TOURNAMENT ${tournament.number}  •  MATCH ${currentMatch}`,
+    74,
+    160
+  );
+
+
+  /* =====================================================
+     COLUMN POSITIONS
+     ===================================================== */
+
+  const columns = {
+
+    rank: 70,
+
+    player: 145,
+
+    win: 620,
+
+    mvp: 750,
+
+    quadra: 875,
+
+    penta: 1000,
+
+    ppcc: 1135,
+
+    tank: 1290,
+
+    dps: 1430,
+
+    score: 1635
+
+  };
+
+
+  /* =====================================================
+     TABLE HEADER
+     ===================================================== */
+
+  const tableY =
+    headerHeight;
+
+
+  ctx.fillStyle =
+    "#151b24";
+
+
+  ctx.fillRect(
+    40,
+    tableY,
+    width - 80,
+    tableHeaderHeight
+  );
+
+
+  ctx.fillStyle =
+    "#f5f7fa";
+
+
+  ctx.font =
+    "900 19px Arial";
+
+
+  ctx.textAlign =
+    "left";
+
+
+  ctx.fillText(
+    "#",
+    columns.rank,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "PLAYER",
+    columns.player,
+    tableY + 49
+  );
+
+
+  ctx.textAlign =
+    "center";
+
+
+  ctx.fillText(
+    "WIN",
+    columns.win,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "MVP",
+    columns.mvp,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "QD",
+    columns.quadra,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "PT",
+    columns.penta,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "PPCC",
+    columns.ppcc,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "TANK",
+    columns.tank,
+    tableY + 49
+  );
+
+
+  ctx.fillText(
+    "DPS",
+    columns.dps,
+    tableY + 49
+  );
+
+
+  /* SCORE HEADER */
+
+  ctx.fillStyle =
+    "#ff8a24";
+
+
+  ctx.fillText(
+    "SCORE",
+    columns.score,
+    tableY + 49
+  );
+
+
+  /* =====================================================
+     PLAYER ROWS
+     ===================================================== */
 
   sorted.forEach(
     (player, index) => {
 
-      /* Row */
+      const y =
+        tableY +
+        tableHeaderHeight +
+        index * rowHeight;
+
+
+      /* ROW BACKGROUND */
 
       ctx.fillStyle =
         index % 2 === 0
@@ -1728,63 +1921,240 @@ function generateResultImage() {
 
 
       ctx.fillRect(
-        70,
-        y - 48,
-        1460,
-        70
+        40,
+        y,
+        width - 80,
+        rowHeight
       );
 
 
-      /* Rank */
+      /* DIVIDER */
 
       ctx.fillStyle =
-        index === 0
+        "#252c36";
+
+
+      ctx.fillRect(
+        40,
+        y + rowHeight - 1,
+        width - 80,
+        1
+      );
+
+
+      /* RANK */
+
+      ctx.textAlign =
+        "left";
+
+
+      ctx.font =
+        "900 23px Arial";
+
+
+      ctx.fillStyle =
+        index < 3
           ? "#ffb04a"
           : "#f5f7fa";
 
 
-      ctx.font =
-        "900 30px Arial";
-
-
       ctx.fillText(
         `#${index + 1}`,
-        95,
-        y
+        columns.rank,
+        y + 55
       );
 
 
-      /* Player */
+      /* PLAYER NAME */
 
       ctx.fillStyle =
         "#f5f7fa";
 
 
+      ctx.font =
+        "900 21px Arial";
+
+
+      let playerName =
+        String(player.name);
+
+
+      if (
+        playerName.length > 25
+      ) {
+
+        playerName =
+          playerName.substring(
+            0,
+            22
+          ) + "...";
+
+      }
+
+
       ctx.fillText(
-        player.name,
-        190,
-        y
+        playerName,
+        columns.player,
+        y + 55
       );
 
 
-      /* Score */
+      /* ACHIEVEMENTS */
+
+      ctx.textAlign =
+        "center";
+
+
+      ctx.font =
+        "900 21px Arial";
+
+
+      ctx.fillStyle =
+        "#dfe4eb";
+
+
+      const achievements =
+        player.achievements || {};
+
+
+      /* WIN */
+
+      ctx.fillText(
+        achievements.win || 0,
+        columns.win,
+        y + 55
+      );
+
+
+      /* MVP */
+
+      ctx.fillText(
+        achievements.mvp || 0,
+        columns.mvp,
+        y + 55
+      );
+
+
+      /* QUADRA */
+
+      ctx.fillText(
+        achievements.quadra || 0,
+        columns.quadra,
+        y + 55
+      );
+
+
+      /* PENTA */
+
+      ctx.fillText(
+        achievements.penta || 0,
+        columns.penta,
+        y + 55
+      );
+
+
+      /* PPCC */
+
+      ctx.fillText(
+        achievements.ppcc || 0,
+        columns.ppcc,
+        y + 55
+      );
+
+
+      /* PERFECT TANK */
+
+      ctx.fillText(
+        achievements.tank || 0,
+        columns.tank,
+        y + 55
+      );
+
+
+      /* PERFECT DPS */
+
+      ctx.fillText(
+        achievements.dps || 0,
+        columns.dps,
+        y + 55
+      );
+
+
+      /* TOTAL SCORE */
 
       ctx.fillStyle =
         "#ff8a24";
 
 
+      ctx.font =
+        "900 25px Arial";
+
+
       ctx.fillText(
-        String(player.score),
-        1390,
-        y
+        player.score || 0,
+        columns.score,
+        y + 55
       );
-
-
-      y += 90;
 
     }
   );
 
+
+  /* =====================================================
+     FOOTER
+     ===================================================== */
+
+  const footerY =
+    tableY +
+    tableHeaderHeight +
+    sorted.length * rowHeight;
+
+
+  ctx.fillStyle =
+    "#0b1018";
+
+
+  ctx.fillRect(
+    40,
+    footerY,
+    width - 80,
+    footerHeight
+  );
+
+
+  ctx.textAlign =
+    "left";
+
+
+  ctx.fillStyle =
+    "#9aa4b2";
+
+
+  ctx.font =
+    "18px Arial";
+
+
+  ctx.fillText(
+    "SOT • Saturday Open Tournament",
+    70,
+    footerY + 43
+  );
+
+
+  ctx.textAlign =
+    "right";
+
+
+  ctx.fillText(
+    "NoName",
+    width - 70,
+    footerY + 43
+  );
+
+
+  /* =====================================================
+     PREVIEW
+     ===================================================== */
 
   $("resultImage").src =
     canvas.toDataURL(
