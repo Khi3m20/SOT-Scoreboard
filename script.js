@@ -26,7 +26,7 @@ const STORAGE_KEYS = {
 
 /* =========================================================
    STORAGE
-========================================================= */
+   ========================================================= */
 
 const Storage = {
 
@@ -133,7 +133,7 @@ const Storage = {
 
 /* =========================================================
    STATE
-========================================================= */
+   ========================================================= */
 
 let players = Storage.loadPlayers();
 
@@ -150,14 +150,14 @@ let isAdmin = false;
 
 /* =========================================================
    HELPER
-========================================================= */
+   ========================================================= */
 
 const $ = id => document.getElementById(id);
 
 
 /* =========================================================
    START
-========================================================= */
+   ========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
@@ -175,7 +175,7 @@ document.addEventListener(
 
 /* =========================================================
    EVENTS
-========================================================= */
+   ========================================================= */
 
 function setupEvents() {
 
@@ -204,6 +204,7 @@ function setupEvents() {
 
 
   /* ENTER = ADD PLAYER */
+
   $("playerName").addEventListener(
     "keydown",
     event => {
@@ -244,12 +245,6 @@ function setupEvents() {
   );
 
 
-  $("addPlayerShortcutBtn").addEventListener(
-    "click",
-    focusAddPlayer
-  );
-
-
   $("currentMatch").addEventListener(
     "change",
     event => {
@@ -263,16 +258,32 @@ function setupEvents() {
     renderLeaderboard
   );
 
+
+  /* QUICK ADD PLAYER */
+
+  const addPlayerShortcut =
+    $("addPlayerShortcutBtn");
+
+  if (addPlayerShortcut) {
+
+    addPlayerShortcut.addEventListener(
+      "click",
+      focusAddPlayer
+    );
+
+  }
+
 }
 
 
 /* =========================================================
    LOGIN
-========================================================= */
+   ========================================================= */
 
 function openLogin() {
 
-  $("loginPanel").style.display = "block";
+  $("loginPanel").style.display =
+    "block";
 
   $("loginUsername").focus();
 
@@ -351,6 +362,10 @@ function login(event) {
 }
 
 
+/* =========================================================
+   LOGOUT
+   ========================================================= */
+
 function logout() {
 
   isAdmin = false;
@@ -382,8 +397,44 @@ function logout() {
 
 
 /* =========================================================
+   ADD PLAYER PANEL
+   ========================================================= */
+
+function focusAddPlayer() {
+
+  if (!isAdmin) return;
+
+
+  const panel =
+    $("addPlayerPanel");
+
+
+  const input =
+    $("playerName");
+
+
+  if (!panel || !input) return;
+
+
+  panel.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+
+  setTimeout(
+    () => {
+      input.focus();
+    },
+    300
+  );
+
+}
+
+
+/* =========================================================
    PLAYER
-========================================================= */
+   ========================================================= */
 
 function createPlayer(name) {
 
@@ -482,40 +533,7 @@ function addPlayer(event) {
   renderEverything();
 
 
-  /*
-    Keep focus here so multiple players
-    can be added quickly.
-  */
-
   $("playerName").focus();
-
-}
-
-
-function focusAddPlayer() {
-
-  if (!isAdmin) return;
-
-
-  const playerInput =
-    $("playerName");
-
-
-  if (!playerInput) return;
-
-
-  playerInput.scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
-
-
-  setTimeout(
-    () => {
-      playerInput.focus();
-    },
-    250
-  );
 
 }
 
@@ -627,7 +645,7 @@ function deletePlayer(id) {
 
 /* =========================================================
    SCORING
-========================================================= */
+   ========================================================= */
 
 function calculateScore(player) {
 
@@ -724,7 +742,7 @@ function changeAchievement(
 
 /* =========================================================
    SCORING SETTINGS
-========================================================= */
+   ========================================================= */
 
 function loadScoringInputs() {
 
@@ -835,7 +853,7 @@ function applyScoring() {
 
 /* =========================================================
    LIVE MATCH
-========================================================= */
+   ========================================================= */
 
 function changeMatch(amount) {
 
@@ -907,7 +925,7 @@ function updateMatchDisplay() {
 
 /* =========================================================
    LEADERBOARD
-========================================================= */
+   ========================================================= */
 
 function updateLeaderboard() {
 
@@ -958,21 +976,60 @@ function updateLeaderboard() {
 
 /* =========================================================
    NEW TOURNAMENT
-   DOES NOT ARCHIVE
-========================================================= */
+   ========================================================= */
 
 function newTournament() {
 
   if (!isAdmin) return;
 
 
+  if (!players.length) {
+
+    alert(
+      "There are no players to archive."
+    );
+
+    return;
+
+  }
+
+
   const confirmed =
     confirm(
-      `Start Tournament ${tournament.number + 1}? The current scoreboard will be cleared and will NOT be archived.`
+      "Archive this tournament and start a new one?"
     );
 
 
   if (!confirmed) return;
+
+
+  recalculateScores();
+
+
+  const archivedTournament = {
+
+    id: Date.now(),
+
+    tournamentNumber:
+      tournament.number,
+
+    date:
+      new Date().toISOString(),
+
+    matchCount:
+      currentMatch,
+
+    players:
+      JSON.parse(
+        JSON.stringify(players)
+      )
+
+  };
+
+
+  history.unshift(
+    archivedTournament
+  );
 
 
   tournament = {
@@ -991,6 +1048,11 @@ function newTournament() {
   currentMatch = 1;
 
 
+  Storage.saveHistory(
+    history
+  );
+
+
   Storage.saveTournament(
     tournament
   );
@@ -1006,19 +1068,11 @@ function newTournament() {
   );
 
 
-  $("resultPreview").style.display =
-    "none";
-
-
-  $("resultImage").src =
-    "";
-
-
   renderEverything();
 
 
   alert(
-    `Tournament ${tournament.number} started.`
+    `Tournament ${archivedTournament.tournamentNumber} archived.`
   );
 
 }
@@ -1026,7 +1080,7 @@ function newTournament() {
 
 /* =========================================================
    STATS
-========================================================= */
+   ========================================================= */
 
 function renderStats() {
 
@@ -1068,7 +1122,7 @@ function renderStats() {
 
 /* =========================================================
    LEADERBOARD RENDER
-========================================================= */
+   ========================================================= */
 
 function achievementCell(
   player,
@@ -1078,6 +1132,8 @@ function achievementCell(
   const value =
     player.achievements[type];
 
+
+  /* VIEWER = DISPLAY ONLY */
 
   if (!isAdmin) {
 
@@ -1089,6 +1145,8 @@ function achievementCell(
 
   }
 
+
+  /* ADMIN = EDITABLE */
 
   return `
 
@@ -1307,7 +1365,13 @@ function renderLeaderboard() {
 
                     `
 
-                    : "—"
+                    : `
+
+                      <span>
+                        —
+                      </span>
+
+                    `
                 }
 
               </td>
@@ -1325,7 +1389,7 @@ function renderLeaderboard() {
 
 /* =========================================================
    TOP 5
-========================================================= */
+   ========================================================= */
 
 function renderTopFive() {
 
@@ -1370,21 +1434,21 @@ function renderTopFive() {
       .map(
         (player, index) => `
 
-          <div class="top-five-item">
+          <div class="top-player-card">
 
-            <div class="rank">
+            <div class="top-player-rank">
               #${index + 1}
             </div>
 
 
-            <div class="player-name">
+            <div class="top-player-name">
               ${escapeHTML(
                 player.name
               )}
             </div>
 
 
-            <div class="score">
+            <div class="top-player-score">
               ${player.score}
             </div>
 
@@ -1399,7 +1463,7 @@ function renderTopFive() {
 
 /* =========================================================
    HISTORY
-========================================================= */
+   ========================================================= */
 
 function renderHistory() {
 
@@ -1522,8 +1586,7 @@ function renderHistory() {
 
 /* =========================================================
    RESULT IMAGE
-   TOP 10 ONLY
-========================================================= */
+   ========================================================= */
 
 function generateResultImage() {
 
@@ -1546,31 +1609,9 @@ function generateResultImage() {
 
   const sorted =
     [...players].sort(
-      (a, b) => {
-
-        const scoreDifference =
-          b.score - a.score;
-
-
-        if (
-          scoreDifference !== 0
-        ) {
-
-          return scoreDifference;
-
-        }
-
-
-        return a.name.localeCompare(
-          b.name
-        );
-
-      }
+      (a, b) =>
+        b.score - a.score
     );
-
-
-  const topTen =
-    sorted.slice(0, 10);
 
 
   const canvas =
@@ -1579,28 +1620,14 @@ function generateResultImage() {
     );
 
 
-  const rowHeight =
-    86;
-
-
-  const headerHeight =
-    305;
-
-
-  const bottomPadding =
-    60;
-
-
   canvas.width =
-    1800;
+    1600;
 
 
   canvas.height =
     Math.max(
-      760,
-      headerHeight +
-      topTen.length * rowHeight +
-      bottomPadding
+      900,
+      420 + sorted.length * 90
     );
 
 
@@ -1610,9 +1637,7 @@ function generateResultImage() {
     );
 
 
-  /* =======================================================
-     BACKGROUND
-  ======================================================= */
+  /* Background */
 
   ctx.fillStyle =
     "#07090d";
@@ -1626,6 +1651,8 @@ function generateResultImage() {
   );
 
 
+  /* Red top bar */
+
   ctx.fillStyle =
     "#e3263f";
 
@@ -1637,6 +1664,8 @@ function generateResultImage() {
     18
   );
 
+
+  /* Orange bottom bar */
 
   ctx.fillStyle =
     "#ff8a24";
@@ -1650,9 +1679,7 @@ function generateResultImage() {
   );
 
 
-  /* =======================================================
-     TITLE
-  ======================================================= */
+  /* Title */
 
   ctx.fillStyle =
     "#f5f7fa";
@@ -1664,10 +1691,12 @@ function generateResultImage() {
 
   ctx.fillText(
     "SOT SCOREBOARD",
-    70,
-    92
+    80,
+    110
   );
 
+
+  /* Subtitle */
 
   ctx.fillStyle =
     "#ff8a24";
@@ -1679,146 +1708,18 @@ function generateResultImage() {
 
   ctx.fillText(
     "SATURDAY OPEN TOURNAMENT",
-    74,
-    135
+    84,
+    155
   );
 
 
-  ctx.fillStyle =
-    "#8f98a8";
+  let y = 240;
 
 
-  ctx.font =
-    "700 23px Arial";
-
-
-  ctx.fillText(
-    `TOURNAMENT ${tournament.number}`,
-    74,
-    175
-  );
-
-
-  /* =======================================================
-     TABLE HEADER
-  ======================================================= */
-
-  const tableX =
-    50;
-
-
-  const tableWidth =
-    1700;
-
-
-  const headerY =
-    225;
-
-
-  ctx.fillStyle =
-    "#11161e";
-
-
-  ctx.fillRect(
-    tableX,
-    headerY - 36,
-    tableWidth,
-    58
-  );
-
-
-  ctx.fillStyle =
-    "#8f98a8";
-
-
-  ctx.font =
-    "900 18px Arial";
-
-
-  ctx.fillText(
-    "RANK",
-    72,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "PLAYER",
-    155,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "WIN",
-    700,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "MVP",
-    810,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "QUADRA",
-    920,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "PENTA",
-    1060,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "PPCC",
-    1185,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "TANK",
-    1295,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "DPS",
-    1405,
-    headerY
-  );
-
-
-  ctx.fillText(
-    "SCORE",
-    1510,
-    headerY
-  );
-
-
-  /* =======================================================
-     PLAYER ROWS
-  ======================================================= */
-
-  let y =
-    285;
-
-
-  topTen.forEach(
+  sorted.forEach(
     (player, index) => {
 
-      const a =
-        player.achievements;
-
+      /* Row */
 
       ctx.fillStyle =
         index % 2 === 0
@@ -1827,12 +1728,14 @@ function generateResultImage() {
 
 
       ctx.fillRect(
-        tableX,
-        y - 35,
-        tableWidth,
-        68
+        70,
+        y - 48,
+        1460,
+        70
       );
 
+
+      /* Rank */
 
       ctx.fillStyle =
         index === 0
@@ -1841,135 +1744,47 @@ function generateResultImage() {
 
 
       ctx.font =
-        "900 24px Arial";
+        "900 30px Arial";
 
 
       ctx.fillText(
         `#${index + 1}`,
-        72,
+        95,
         y
       );
 
+
+      /* Player */
 
       ctx.fillStyle =
         "#f5f7fa";
 
 
-      ctx.font =
-        "900 23px Arial";
-
-
       ctx.fillText(
-        truncateText(
-          ctx,
-          player.name,
-          500
-        ),
-        155,
+        player.name,
+        190,
         y
       );
 
 
-      ctx.font =
-        "800 21px Arial";
-
-
-      ctx.fillStyle =
-        "#e7eaf0";
-
-
-      ctx.fillText(
-        String(a.win),
-        700,
-        y
-      );
-
-
-      ctx.fillText(
-        String(a.mvp),
-        810,
-        y
-      );
-
-
-      ctx.fillText(
-        String(a.quadra),
-        920,
-        y
-      );
-
-
-      ctx.fillText(
-        String(a.penta),
-        1060,
-        y
-      );
-
-
-      ctx.fillText(
-        String(a.ppcc),
-        1185,
-        y
-      );
-
-
-      ctx.fillText(
-        String(a.tank),
-        1295,
-        y
-      );
-
-
-      ctx.fillText(
-        String(a.dps),
-        1405,
-        y
-      );
-
+      /* Score */
 
       ctx.fillStyle =
         "#ff8a24";
 
 
-      ctx.font =
-        "900 24px Arial";
-
-
       ctx.fillText(
         String(player.score),
-        1510,
+        1390,
         y
       );
 
 
-      y += rowHeight;
+      y += 90;
 
     }
   );
 
-
-  /* =======================================================
-     FOOTER
-  ======================================================= */
-
-  ctx.fillStyle =
-    "#697282";
-
-
-  ctx.font =
-    "700 17px Arial";
-
-
-  ctx.fillText(
-    `TOP ${topTen.length} • SOT SCOREBOARD`,
-    70,
-    canvas.height - 32
-  );
-
-
-  /* =======================================================
-     DISPLAY IMAGE
-  ======================================================= */
 
   $("resultImage").src =
     canvas.toDataURL(
@@ -1980,67 +1795,120 @@ function generateResultImage() {
   $("resultPreview").style.display =
     "block";
 
-
-  $("resultPreview").scrollIntoView({
-    behavior: "smooth",
-    block: "center"
-  });
-
 }
 
 
 /* =========================================================
-   CANVAS TEXT HELPER
-========================================================= */
+   ADMIN / VIEWER UI
+   ========================================================= */
 
-function truncateText(
-  ctx,
-  text,
-  maxWidth
-) {
+function updatePermissionUI() {
 
-  const value =
-    String(text);
+  const addPlayerPanel =
+    $("addPlayerPanel");
 
-
-  if (
-    ctx.measureText(value).width <=
-    maxWidth
-  ) {
-
-    return value;
-
-  }
+  const addPlayerShortcut =
+    $("addPlayerShortcutBtn");
 
 
-  let shortened =
-    value;
+  /*
+    ADD PLAYER:
+    Admin only.
+  */
 
+  if (addPlayerPanel) {
 
-  while (
-    shortened.length > 1 &&
-    ctx.measureText(
-      shortened + "..."
-    ).width > maxWidth
-  ) {
-
-    shortened =
-      shortened.slice(
-        0,
-        -1
-      );
+    addPlayerPanel.style.display =
+      isAdmin
+        ? "block"
+        : "none";
 
   }
 
 
-  return shortened + "...";
+  /*
+    QUICK ADD:
+    Admin only.
+  */
+
+  if (addPlayerShortcut) {
+
+    addPlayerShortcut.style.display =
+      isAdmin
+        ? "inline-block"
+        : "none";
+
+  }
+
+
+  /*
+    ADMIN CONTROLS:
+    Admin only.
+  */
+
+  $("adminControls").style.display =
+    isAdmin
+      ? "grid"
+      : "none";
+
+
+  /*
+    Current match input:
+    Viewer can see live match,
+    but cannot control it.
+  */
+
+  $("currentMatch").disabled =
+    !isAdmin;
+
+
+  /*
+    Scoring inputs:
+    Viewer cannot edit them.
+  */
+
+  [
+    "winPoints",
+    "mvpPoints",
+    "quadraPoints",
+    "pentaPoints",
+    "ppccPoints",
+    "tankPoints",
+    "dpsPoints"
+  ].forEach(
+    id => {
+
+      $(id).disabled =
+        !isAdmin;
+
+    }
+  );
+
+
+  /*
+    Admin action buttons.
+  */
+
+  [
+    "applyScoring",
+    "updateLeaderboardBtn",
+    "newTournamentBtn",
+    "generateResultBtn"
+  ].forEach(
+    id => {
+
+      $(id).disabled =
+        !isAdmin;
+
+    }
+  );
 
 }
 
 
 /* =========================================================
    RENDER EVERYTHING
-========================================================= */
+   ========================================================= */
 
 function renderEverything() {
 
@@ -2056,35 +1924,14 @@ function renderEverything() {
 
   updateMatchDisplay();
 
-
-  /*
-    ADD PLAYER panel is now physically
-    below the leaderboard.
-
-    It must only be visible to admins.
-  */
-
-  $("addPlayerPanel").style.display =
-    isAdmin
-      ? "block"
-      : "none";
-
-
-  /*
-    Keep the shortcut button working.
-  */
-
-  $("addPlayerShortcutBtn").style.display =
-    isAdmin
-      ? "inline-block"
-      : "none";
+  updatePermissionUI();
 
 }
 
 
 /* =========================================================
    SECURITY / HTML ESCAPE
-========================================================= */
+   ========================================================= */
 
 function escapeHTML(value) {
 
@@ -2120,7 +1967,7 @@ function escapeHTML(value) {
 
 /* =========================================================
    DATE
-========================================================= */
+   ========================================================= */
 
 function formatDate(
   dateString
@@ -2142,7 +1989,7 @@ function formatDate(
 
 /* =========================================================
    DEBUG / FUTURE SUPABASE LAYER
-========================================================= */
+   ========================================================= */
 
 window.SOT = {
 
