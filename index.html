@@ -380,101 +380,6 @@
 
       </div>
 
-
-
-      <!-- LEADERBOARD CONTROL -->
-
-      <div class="control-panel">
-
-        <h2>
-          LEADERBOARD CONTROL
-        </h2>
-
-
-        <p class="control-description">
-          Recalculate all player scores and update the current leaderboard.
-        </p>
-
-
-        <button
-          id="updateLeaderboardBtn"
-          type="button"
-        >
-          UPDATE LEADERBOARD
-        </button>
-
-      </div>
-
-
-
-      <!-- TOURNAMENT CONTROL -->
-
-      <div class="control-panel">
-
-        <h2>
-          TOURNAMENT CONTROL
-        </h2>
-
-
-        <p class="control-description">
-          Archive the current tournament and start a new one.
-        </p>
-
-
-        <button
-          id="newTournamentBtn"
-          type="button"
-        >
-          NEW TOURNAMENT
-        </button>
-
-      </div>
-
-
-
-      <!-- RESULT IMAGE -->
-
-      <div class="control-panel result-control">
-
-        <h2>
-          TOURNAMENT RESULT
-        </h2>
-
-
-        <p class="control-description">
-          Generate a final result image from the current leaderboard.
-        </p>
-
-
-        <button
-          id="generateResultBtn"
-          type="button"
-        >
-          GENERATE RESULT IMAGE
-        </button>
-
-
-        <div
-          id="resultPreview"
-          style="display:none;"
-        >
-
-          <h3>
-            RESULT PREVIEW
-          </h3>
-
-
-          <img
-            id="resultImage"
-            src=""
-            alt="Tournament result"
-          >
-
-        </div>
-
-      </div>
-
-
     </section>
 
 
@@ -649,6 +554,79 @@
         <p>
           Players will appear here once they are added.
         </p>
+
+      </div>
+
+
+      <!-- =================================================
+           LEADERBOARD SHORTCUTS
+           ================================================= -->
+
+      <div
+        id="leaderboardActions"
+        style="
+          display:flex;
+          align-items:center;
+          gap:10px;
+          flex-wrap:wrap;
+          margin-top:16px;
+        "
+      >
+
+        <button
+          id="addPlayerShortcutBtn"
+          type="button"
+          style="display:none;"
+        >
+          ADD PLAYER
+        </button>
+
+
+        <button
+          id="updateLeaderboardBtn"
+          type="button"
+        >
+          UPDATE LEADERBOARD
+        </button>
+
+
+        <button
+          id="generateResultBtn"
+          type="button"
+        >
+          GENERATE RESULT IMAGE
+        </button>
+
+
+        <button
+          id="newTournamentBtn"
+          type="button"
+        >
+          NEW TOURNAMENT
+        </button>
+
+      </div>
+
+
+      <!-- =================================================
+           RESULT IMAGE
+           ================================================= -->
+
+      <div
+        id="resultPreview"
+        style="display:none; margin-top:16px;"
+      >
+
+        <h3>
+          RESULT PREVIEW
+        </h3>
+
+
+        <img
+          id="resultImage"
+          src=""
+          alt="Tournament result"
+        >
 
       </div>
 
