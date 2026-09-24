@@ -203,6 +203,23 @@ function setupEvents() {
   );
 
 
+  /* ENTER = ADD PLAYER */
+  $("playerName").addEventListener(
+    "keydown",
+    event => {
+
+      if (event.key === "Enter") {
+
+        event.preventDefault();
+
+        $("playerForm").requestSubmit();
+
+      }
+
+    }
+  );
+
+
   $("applyScoring").addEventListener(
     "click",
     applyScoring
@@ -439,6 +456,8 @@ function addPlayer(event) {
       "Player already exists."
     );
 
+    $("playerName").focus();
+
     return;
 
   }
@@ -463,7 +482,10 @@ function addPlayer(event) {
   renderEverything();
 
 
-  /* Keep focus here so multiple players can be added quickly. */
+  /*
+    Keep focus here so multiple players
+    can be added quickly.
+  */
 
   $("playerName").focus();
 
@@ -1604,8 +1626,6 @@ function generateResultImage() {
   );
 
 
-  /* Red top bar */
-
   ctx.fillStyle =
     "#e3263f";
 
@@ -1617,8 +1637,6 @@ function generateResultImage() {
     18
   );
 
-
-  /* Orange bottom bar */
 
   ctx.fillStyle =
     "#ff8a24";
@@ -1651,8 +1669,6 @@ function generateResultImage() {
   );
 
 
-  /* Subtitle */
-
   ctx.fillStyle =
     "#ff8a24";
 
@@ -1667,8 +1683,6 @@ function generateResultImage() {
     135
   );
 
-
-  /* Tournament number */
 
   ctx.fillStyle =
     "#8f98a8";
@@ -1806,8 +1820,6 @@ function generateResultImage() {
         player.achievements;
 
 
-      /* Row */
-
       ctx.fillStyle =
         index % 2 === 0
           ? "#11161e"
@@ -1821,8 +1833,6 @@ function generateResultImage() {
         68
       );
 
-
-      /* Rank */
 
       ctx.fillStyle =
         index === 0
@@ -1840,8 +1850,6 @@ function generateResultImage() {
         y
       );
 
-
-      /* Player */
 
       ctx.fillStyle =
         "#f5f7fa";
@@ -1861,8 +1869,6 @@ function generateResultImage() {
         y
       );
 
-
-      /* Achievements */
 
       ctx.font =
         "800 21px Arial";
@@ -1920,8 +1926,6 @@ function generateResultImage() {
         y
       );
 
-
-      /* Score */
 
       ctx.fillStyle =
         "#ff8a24";
@@ -2053,7 +2057,22 @@ function renderEverything() {
   updateMatchDisplay();
 
 
-  /* Admin-only shortcut */
+  /*
+    ADD PLAYER panel is now physically
+    below the leaderboard.
+
+    It must only be visible to admins.
+  */
+
+  $("addPlayerPanel").style.display =
+    isAdmin
+      ? "block"
+      : "none";
+
+
+  /*
+    Keep the shortcut button working.
+  */
 
   $("addPlayerShortcutBtn").style.display =
     isAdmin
