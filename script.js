@@ -1,9 +1,17 @@
+const SUPABASE_URL =
+  "https://kbwqabwusxqaomgubzqg.supabase.co";
+
+const SUPABASE_PUBLISHABLE_KEY =
+  "sb_publishable_NV_3lSWmBH-pEOAAMp8ftw_NAEi7DqA";
+
+
 const PROTOTYPE_ADMINS = [
   {
     username: "JKNN",
     password: "SOTfree"
   }
 ];
+
 
 const DEFAULT_SCORING = {
   win: 10,
@@ -15,135 +23,32 @@ const DEFAULT_SCORING = {
   dps: 1
 };
 
-const STORAGE_KEYS = {
-  players: "sot_players",
-  scoring: "sot_scoring",
-  match: "sot_match",
-  history: "sot_history",
-  tournament: "sot_tournament"
-};
-
 
 /* =========================================================
-   STORAGE
+   SUPABASE
    ========================================================= */
 
-const Storage = {
-
-  loadPlayers() {
-    try {
-      return JSON.parse(
-        localStorage.getItem(STORAGE_KEYS.players)
-      ) || [];
-    } catch {
-      return [];
-    }
-  },
-
-  savePlayers(data) {
-    localStorage.setItem(
-      STORAGE_KEYS.players,
-      JSON.stringify(data)
-    );
-  },
-
-
-  loadScoring() {
-    try {
-      return {
-        ...DEFAULT_SCORING,
-        ...(JSON.parse(
-          localStorage.getItem(STORAGE_KEYS.scoring)
-        ) || {})
-      };
-    } catch {
-      return {
-        ...DEFAULT_SCORING
-      };
-    }
-  },
-
-  saveScoring(data) {
-    localStorage.setItem(
-      STORAGE_KEYS.scoring,
-      JSON.stringify(data)
-    );
-  },
-
-
-  loadMatch() {
-    const number = Number(
-      localStorage.getItem(STORAGE_KEYS.match)
-    );
-
-    return number >= 1 ? number : 1;
-  },
-
-  saveMatch(number) {
-    localStorage.setItem(
-      STORAGE_KEYS.match,
-      String(number)
-    );
-  },
-
-
-  loadHistory() {
-    try {
-      return JSON.parse(
-        localStorage.getItem(STORAGE_KEYS.history)
-      ) || [];
-    } catch {
-      return [];
-    }
-  },
-
-  saveHistory(data) {
-    localStorage.setItem(
-      STORAGE_KEYS.history,
-      JSON.stringify(data)
-    );
-  },
-
-
-  loadTournament() {
-    try {
-      return JSON.parse(
-        localStorage.getItem(STORAGE_KEYS.tournament)
-      ) || {
-        number: 1,
-        status: "LIVE"
-      };
-    } catch {
-      return {
-        number: 1,
-        status: "LIVE"
-      };
-    }
-  },
-
-  saveTournament(data) {
-    localStorage.setItem(
-      STORAGE_KEYS.tournament,
-      JSON.stringify(data)
-    );
-  }
-
-};
+let supabaseClient = null;
 
 
 /* =========================================================
    STATE
    ========================================================= */
 
-let players = Storage.loadPlayers();
+let players = [];
 
-let scoring = Storage.loadScoring();
+let scoring = {
+  ...DEFAULT_SCORING
+};
 
-let currentMatch = Storage.loadMatch();
+let currentMatch = 1;
 
-let tournament = Storage.loadTournament();
+let tournament = {
+  number: 1,
+  status: "LIVE"
+};
 
-let history = Storage.loadHistory();
+let history = [];
 
 let isAdmin = false;
 
@@ -152,7 +57,740 @@ let isAdmin = false;
    HELPER
    ========================================================= */
 
-const $ = id => document.getElementById(id);
+const $ = id =>
+  document.getElementById(id);
+
+
+/* =========================================================
+   SUPABASE LOADER
+   ========================================================= */
+
+function loadSupabaseLibrary() {
+
+  return new Promise(
+    (resolve, reject) => {
+
+      if (
+        window.supabase &&
+        typeof window.supabase.createClient ===
+          "function"
+      ) {
+
+        resolve();
+
+        return;
+
+      }
+
+
+      const script =
+        document.createElement("script");
+
+
+      script.src =
+        "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+
+
+      script.onload =
+        () => resolve();
+
+
+      script.onerror =
+        () =>
+          reject(
+            new Error(
+              "Unable to load Supabase library."
+            )
+          );
+
+
+      document.head.appendChild(
+        script
+      );
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   SUPABASE INIT
+   ========================================================= */
+
+async function initializeSupabase() {
+
+  await loadSupabaseLibrary();
+
+
+  supabaseClient =
+    window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_PUBLISHABLE_KEY
+    );
+
+}
+
+
+/* =========================================================
+   DATABASE
+   ========================================================= */
+
+const Database = {
+
+
+  /* =====================================================
+     PLAYERS
+     ===================================================== */
+
+  async loadPlayers() {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("players")
+        .select("*");
+
+
+    if (error) {
+
+      console.error(
+        "Load players error:",
+        error
+      );
+
+      return [];
+
+    }
+
+
+    return (
+      data || []
+    ).map(
+      row => ({
+
+        id:
+          row.id,
+
+        name:
+          row.name,
+
+        achievements: {
+
+          win:
+            Number(row.win) || 0,
+
+          mvp:
+            Number(row.mvp) || 0,
+
+          quadra:
+            Number(row.quadra) || 0,
+
+          penta:
+            Number(row.penta) || 0,
+
+          ppcc:
+            Number(row.ppcc) || 0,
+
+          tank:
+            Number(row.tank) || 0,
+
+          dps:
+            Number(row.dps) || 0
+
+        },
+
+        score:
+          Number(row.score) || 0,
+
+        updatedAt:
+          row.updated_at ||
+          new Date().toISOString()
+
+      })
+    );
+
+  },
+
+
+  /* =====================================================
+     SAVE ALL PLAYERS
+     ===================================================== */
+
+  async savePlayers(data) {
+
+    /*
+      First delete players that no longer exist.
+    */
+
+    const {
+      data: existingRows,
+      error: existingError
+    } =
+      await supabaseClient
+        .from("players")
+        .select("id");
+
+
+    if (existingError) {
+
+      console.error(
+        "Load player IDs error:",
+        existingError
+      );
+
+      return false;
+
+    }
+
+
+    const newIds =
+      new Set(
+        data.map(
+          player => player.id
+        )
+      );
+
+
+    const idsToDelete =
+      (existingRows || [])
+        .map(row => row.id)
+        .filter(
+          id =>
+            !newIds.has(id)
+        );
+
+
+    if (
+      idsToDelete.length
+    ) {
+
+      const {
+        error
+      } =
+        await supabaseClient
+          .from("players")
+          .delete()
+          .in(
+            "id",
+            idsToDelete
+          );
+
+
+      if (error) {
+
+        console.error(
+          "Delete players error:",
+          error
+        );
+
+        return false;
+
+      }
+
+    }
+
+
+    /*
+      Upsert current players.
+    */
+
+    if (!data.length) {
+
+      return true;
+
+    }
+
+
+    const rows =
+      data.map(
+        player => ({
+
+          id:
+            player.id,
+
+          name:
+            player.name,
+
+          win:
+            Number(
+              player.achievements?.win
+            ) || 0,
+
+          mvp:
+            Number(
+              player.achievements?.mvp
+            ) || 0,
+
+          quadra:
+            Number(
+              player.achievements?.quadra
+            ) || 0,
+
+          penta:
+            Number(
+              player.achievements?.penta
+            ) || 0,
+
+          ppcc:
+            Number(
+              player.achievements?.ppcc
+            ) || 0,
+
+          tank:
+            Number(
+              player.achievements?.tank
+            ) || 0,
+
+          dps:
+            Number(
+              player.achievements?.dps
+            ) || 0,
+
+          score:
+            Number(
+              player.score
+            ) || 0
+
+        })
+      );
+
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("players")
+        .upsert(
+          rows,
+          {
+            onConflict: "id"
+          }
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Save players error:",
+        error
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  },
+
+
+  /* =====================================================
+     SCORING
+     ===================================================== */
+
+  async loadScoring() {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("scoring")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle();
+
+
+    if (error) {
+
+      console.error(
+        "Load scoring error:",
+        error
+      );
+
+      return {
+        ...DEFAULT_SCORING
+      };
+
+    }
+
+
+    if (!data) {
+
+      return {
+        ...DEFAULT_SCORING
+      };
+
+    }
+
+
+    return {
+
+      win:
+        Number(data.win) || 0,
+
+      mvp:
+        Number(data.mvp) || 0,
+
+      quadra:
+        Number(data.quadra) || 0,
+
+      penta:
+        Number(data.penta) || 0,
+
+      ppcc:
+        Number(data.ppcc) || 0,
+
+      tank:
+        Number(data.tank) || 0,
+
+      dps:
+        Number(data.dps) || 0
+
+    };
+
+  },
+
+
+  async saveScoring(data) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("scoring")
+        .upsert({
+
+          id: 1,
+
+          win:
+            data.win,
+
+          mvp:
+            data.mvp,
+
+          quadra:
+            data.quadra,
+
+          penta:
+            data.penta,
+
+          ppcc:
+            data.ppcc,
+
+          tank:
+            data.tank,
+
+          dps:
+            data.dps
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Save scoring error:",
+        error
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  },
+
+
+  /* =====================================================
+     TOURNAMENT
+     ===================================================== */
+
+  async loadTournament() {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("tournament")
+        .select("*")
+        .eq("id", 1)
+        .maybeSingle();
+
+
+    if (error) {
+
+      console.error(
+        "Load tournament error:",
+        error
+      );
+
+      return {
+        number: 1,
+        status: "LIVE"
+      };
+
+    }
+
+
+    if (!data) {
+
+      return {
+        number: 1,
+        status: "LIVE"
+      };
+
+    }
+
+
+    return {
+
+      number:
+        Number(
+          data.tournament_number
+        ) || 1,
+
+      status:
+        "LIVE"
+
+    };
+
+  },
+
+
+  async saveTournament(data) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("tournament")
+        .upsert({
+
+          id: 1,
+
+          current_match:
+            currentMatch,
+
+          tournament_number:
+            Number(data.number) || 1
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Save tournament error:",
+        error
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  },
+
+
+  /* =====================================================
+     MATCH
+     ===================================================== */
+
+  async loadMatch() {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("tournament")
+        .select("current_match")
+        .eq("id", 1)
+        .maybeSingle();
+
+
+    if (error) {
+
+      console.error(
+        "Load match error:",
+        error
+      );
+
+      return 1;
+
+    }
+
+
+    const number =
+      Number(
+        data?.current_match
+      );
+
+
+    return number >= 1
+      ? number
+      : 1;
+
+  },
+
+
+  async saveMatch(number) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from("tournament")
+        .upsert({
+
+          id: 1,
+
+          current_match:
+            number,
+
+          tournament_number:
+            Number(
+              tournament.number
+            ) || 1
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Save match error:",
+        error
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  },
+
+
+  /* =====================================================
+     HISTORY
+     ===================================================== */
+
+  async loadHistory() {
+
+    const {
+      data,
+      error
+    } =
+      await supabaseClient
+        .from("tournament_history")
+        .select("*")
+        .order(
+          "archived_at",
+          {
+            ascending: false
+          }
+        );
+
+
+    if (error) {
+
+      console.error(
+        "Load history error:",
+        error
+      );
+
+      return [];
+
+    }
+
+
+    return (
+      data || []
+    ).map(
+      row => ({
+
+        id:
+          row.id,
+
+        tournamentNumber:
+          row.tournament_number,
+
+        date:
+          row.archived_at,
+
+        matchCount:
+          row.players?.matchCount || 1,
+
+        players:
+          row.players?.players || []
+
+      })
+    );
+
+  },
+
+
+  async saveHistoryItem(
+    tournamentData
+  ) {
+
+    const {
+      error
+    } =
+      await supabaseClient
+        .from(
+          "tournament_history"
+        )
+        .insert({
+
+          tournament_number:
+            tournamentData.tournamentNumber,
+
+          players: {
+
+            players:
+              tournamentData.players,
+
+            matchCount:
+              tournamentData.matchCount
+
+          },
+
+          archived_at:
+            tournamentData.date
+
+        });
+
+
+    if (error) {
+
+      console.error(
+        "Save history error:",
+        error
+      );
+
+      return false;
+
+    }
+
+
+    return true;
+
+  }
+
+};
 
 
 /* =========================================================
@@ -161,13 +799,60 @@ const $ = id => document.getElementById(id);
 
 document.addEventListener(
   "DOMContentLoaded",
-  () => {
+  async () => {
 
-    loadScoringInputs();
+    try {
 
-    setupEvents();
+      await initializeSupabase();
 
-    renderEverything();
+
+      players =
+        await Database.loadPlayers();
+
+
+      scoring =
+        await Database.loadScoring();
+
+
+      tournament =
+        await Database.loadTournament();
+
+
+      currentMatch =
+        await Database.loadMatch();
+
+
+      history =
+        await Database.loadHistory();
+
+
+      recalculateScores();
+
+
+      loadScoringInputs();
+
+      setupEvents();
+
+      renderEverything();
+
+
+      console.log(
+        "SOT connected to Supabase."
+      );
+
+    } catch (error) {
+
+      console.error(
+        "SOT startup error:",
+        error
+      );
+
+
+      alert(
+        "Unable to connect to SOT database."
+      );
+
+    }
 
   }
 );
@@ -202,8 +887,6 @@ function setupEvents() {
     addPlayer
   );
 
-
-  /* ENTER = ADD PLAYER */
 
   $("playerName").addEventListener(
     "keydown",
@@ -259,10 +942,9 @@ function setupEvents() {
   );
 
 
-  /* QUICK ADD PLAYER */
-
   const addPlayerShortcut =
     $("addPlayerShortcutBtn");
+
 
   if (addPlayerShortcut) {
 
@@ -333,25 +1015,19 @@ function login(event) {
   $("loginPanel").style.display =
     "none";
 
-
   $("adminControls").style.display =
     "grid";
-
 
   $("loginBtn").style.display =
     "none";
 
-
   $("logoutBtn").style.display =
     "inline-block";
-
 
   $("authStatus").textContent =
     "ADMIN";
 
-
   $("loginForm").reset();
-
 
   $("loginMessage").style.display =
     "none";
@@ -417,8 +1093,11 @@ function focusAddPlayer() {
 
 
   panel.scrollIntoView({
+
     behavior: "smooth",
+
     block: "center"
+
   });
 
 
@@ -478,7 +1157,7 @@ function createPlayer(name) {
 }
 
 
-function addPlayer(event) {
+async function addPlayer(event) {
 
   event.preventDefault();
 
@@ -514,17 +1193,37 @@ function addPlayer(event) {
   }
 
 
-  players.push(
-    createPlayer(name)
-  );
+  const player =
+    createPlayer(name);
+
+
+  players.push(player);
 
 
   recalculateScores();
 
 
-  Storage.savePlayers(
-    players
-  );
+  const success =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!success) {
+
+    players =
+      players.filter(
+        p => p.id !== player.id
+      );
+
+
+    alert(
+      "Failed to save player to database."
+    );
+
+    return;
+
+  }
 
 
   $("playerForm").reset();
@@ -538,7 +1237,7 @@ function addPlayer(event) {
 }
 
 
-function editPlayer(id) {
+async function editPlayer(id) {
 
   if (!isAdmin) return;
 
@@ -589,16 +1288,32 @@ function editPlayer(id) {
   }
 
 
-  player.name = cleaned;
+  const oldName =
+    player.name;
+
+
+  player.name =
+    cleaned;
 
 
   player.updatedAt =
     new Date().toISOString();
 
 
-  Storage.savePlayers(
-    players
-  );
+  const success =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!success) {
+
+    player.name =
+      oldName;
+
+    return;
+
+  }
 
 
   renderEverything();
@@ -606,7 +1321,7 @@ function editPlayer(id) {
 }
 
 
-function deletePlayer(id) {
+async function deletePlayer(id) {
 
   if (!isAdmin) return;
 
@@ -627,15 +1342,34 @@ function deletePlayer(id) {
   ) return;
 
 
+  const oldPlayers =
+    [...players];
+
+
   players =
     players.filter(
       p => p.id !== id
     );
 
 
-  Storage.savePlayers(
-    players
-  );
+  const success =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!success) {
+
+    players =
+      oldPlayers;
+
+    alert(
+      "Failed to delete player."
+    );
+
+    return;
+
+  }
 
 
   renderEverything();
@@ -688,7 +1422,7 @@ function recalculateScores() {
 }
 
 
-function changeAchievement(
+async function changeAchievement(
   playerId,
   type,
   amount
@@ -714,6 +1448,10 @@ function changeAchievement(
   ) return;
 
 
+  const oldValue =
+    player.achievements[type];
+
+
   player.achievements[type] =
     Math.max(
       0,
@@ -730,9 +1468,27 @@ function changeAchievement(
     new Date().toISOString();
 
 
-  Storage.savePlayers(
-    players
-  );
+  const success =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!success) {
+
+    player.achievements[type] =
+      oldValue;
+
+    player.score =
+      calculateScore(player);
+
+    alert(
+      "Failed to save achievement."
+    );
+
+    return;
+
+  }
 
 
   renderEverything();
@@ -749,26 +1505,20 @@ function loadScoringInputs() {
   $("winPoints").value =
     scoring.win;
 
-
   $("mvpPoints").value =
     scoring.mvp;
-
 
   $("quadraPoints").value =
     scoring.quadra;
 
-
   $("pentaPoints").value =
     scoring.penta;
-
 
   $("ppccPoints").value =
     scoring.ppcc;
 
-
   $("tankPoints").value =
     scoring.tank;
-
 
   $("dpsPoints").value =
     scoring.dps;
@@ -797,9 +1547,15 @@ function getNumber(id) {
 }
 
 
-function applyScoring() {
+async function applyScoring() {
 
   if (!isAdmin) return;
+
+
+  const oldScoring =
+    {
+      ...scoring
+    };
 
 
   scoring = {
@@ -828,17 +1584,44 @@ function applyScoring() {
   };
 
 
-  Storage.saveScoring(
-    scoring
-  );
+  const scoringSaved =
+    await Database.saveScoring(
+      scoring
+    );
+
+
+  if (!scoringSaved) {
+
+    scoring =
+      oldScoring;
+
+    loadScoringInputs();
+
+    alert(
+      "Failed to save scoring."
+    );
+
+    return;
+
+  }
 
 
   recalculateScores();
 
 
-  Storage.savePlayers(
-    players
-  );
+  const playersSaved =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!playersSaved) {
+
+    alert(
+      "Scoring saved, but player scores could not be updated."
+    );
+
+  }
 
 
   renderEverything();
@@ -855,9 +1638,13 @@ function applyScoring() {
    LIVE MATCH
    ========================================================= */
 
-function changeMatch(amount) {
+async function changeMatch(amount) {
 
   if (!isAdmin) return;
+
+
+  const oldMatch =
+    currentMatch;
 
 
   currentMatch =
@@ -867,9 +1654,24 @@ function changeMatch(amount) {
     );
 
 
-  Storage.saveMatch(
-    currentMatch
-  );
+  const success =
+    await Database.saveMatch(
+      currentMatch
+    );
+
+
+  if (!success) {
+
+    currentMatch =
+      oldMatch;
+
+    alert(
+      "Failed to update match."
+    );
+
+    return;
+
+  }
 
 
   updateMatchDisplay();
@@ -877,7 +1679,7 @@ function changeMatch(amount) {
 }
 
 
-function setMatch(value) {
+async function setMatch(value) {
 
   if (!isAdmin) return;
 
@@ -886,6 +1688,10 @@ function setMatch(value) {
     Math.floor(
       Number(value)
     );
+
+
+  const oldMatch =
+    currentMatch;
 
 
   currentMatch =
@@ -897,9 +1703,24 @@ function setMatch(value) {
     );
 
 
-  Storage.saveMatch(
-    currentMatch
-  );
+  const success =
+    await Database.saveMatch(
+      currentMatch
+    );
+
+
+  if (!success) {
+
+    currentMatch =
+      oldMatch;
+
+    alert(
+      "Failed to update match."
+    );
+
+    return;
+
+  }
 
 
   updateMatchDisplay();
@@ -927,7 +1748,7 @@ function updateMatchDisplay() {
    LEADERBOARD
    ========================================================= */
 
-function updateLeaderboard() {
+async function updateLeaderboard() {
 
   if (!isAdmin) return;
 
@@ -959,9 +1780,21 @@ function updateLeaderboard() {
   );
 
 
-  Storage.savePlayers(
-    players
-  );
+  const success =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!success) {
+
+    alert(
+      "Failed to save leaderboard."
+    );
+
+    return;
+
+  }
 
 
   renderEverything();
@@ -978,7 +1811,7 @@ function updateLeaderboard() {
    NEW TOURNAMENT
    ========================================================= */
 
-function newTournament() {
+async function newTournament() {
 
   if (!isAdmin) return;
 
@@ -1008,8 +1841,6 @@ function newTournament() {
 
   const archivedTournament = {
 
-    id: Date.now(),
-
     tournamentNumber:
       tournament.number,
 
@@ -1027,9 +1858,25 @@ function newTournament() {
   };
 
 
-  history.unshift(
-    archivedTournament
-  );
+  const historySaved =
+    await Database.saveHistoryItem(
+      archivedTournament
+    );
+
+
+  if (!historySaved) {
+
+    alert(
+      "Failed to archive tournament."
+    );
+
+    return;
+
+  }
+
+
+  const oldTournamentNumber =
+    tournament.number;
 
 
   tournament = {
@@ -1043,36 +1890,79 @@ function newTournament() {
   };
 
 
-  players = [];
-
-  currentMatch = 1;
-
-
-  Storage.saveHistory(
-    history
-  );
+  currentMatch =
+    1;
 
 
-  Storage.saveTournament(
-    tournament
-  );
+  players =
+    [];
 
 
-  Storage.savePlayers(
-    players
-  );
+  const tournamentSaved =
+    await Database.saveTournament(
+      tournament
+    );
 
 
-  Storage.saveMatch(
-    currentMatch
-  );
+  if (!tournamentSaved) {
+
+    alert(
+      "Tournament archived, but new tournament setup failed."
+    );
+
+    return;
+
+  }
+
+
+  const playersSaved =
+    await Database.savePlayers(
+      players
+    );
+
+
+  if (!playersSaved) {
+
+    alert(
+      "Tournament archived, but player reset failed."
+    );
+
+    return;
+
+  }
+
+
+  const matchSaved =
+    await Database.saveMatch(
+      currentMatch
+    );
+
+
+  if (!matchSaved) {
+
+    alert(
+      "Tournament archived, but match reset failed."
+    );
+
+    return;
+
+  }
+
+
+  /*
+    Reload history so the newly archived tournament
+    appears immediately.
+  */
+
+  history =
+    await Database.loadHistory();
 
 
   renderEverything();
 
 
   alert(
-    `Tournament ${archivedTournament.tournamentNumber} archived.`
+    `Tournament ${oldTournamentNumber} archived.`
   );
 
 }
@@ -1133,8 +2023,6 @@ function achievementCell(
     player.achievements[type];
 
 
-  /* VIEWER = DISPLAY ONLY */
-
   if (!isAdmin) {
 
     return `
@@ -1145,8 +2033,6 @@ function achievementCell(
 
   }
 
-
-  /* ADMIN = EDITABLE */
 
   return `
 
@@ -1611,8 +2497,12 @@ function generateResultImage() {
     [...players].sort(
       (a, b) => {
 
-        if (b.score !== a.score) {
+        if (
+          b.score !== a.score
+        ) {
+
           return b.score - a.score;
+
         }
 
         return a.name.localeCompare(
@@ -1629,15 +2519,20 @@ function generateResultImage() {
     );
 
 
-  const width = 1800;
+  const width =
+    1800;
 
-  const headerHeight = 220;
+  const headerHeight =
+    220;
 
-  const tableHeaderHeight = 80;
+  const tableHeaderHeight =
+    80;
 
-  const rowHeight = 88;
+  const rowHeight =
+    88;
 
-  const footerHeight = 70;
+  const footerHeight =
+    70;
 
 
   canvas.width =
@@ -1647,7 +2542,8 @@ function generateResultImage() {
   canvas.height =
     headerHeight +
     tableHeaderHeight +
-    sorted.length * rowHeight +
+    sorted.length *
+      rowHeight +
     footerHeight;
 
 
@@ -1656,10 +2552,6 @@ function generateResultImage() {
       "2d"
     );
 
-
-  /* =====================================================
-     BACKGROUND
-     ===================================================== */
 
   ctx.fillStyle =
     "#07090d";
@@ -1673,8 +2565,6 @@ function generateResultImage() {
   );
 
 
-  /* RED TOP BAR */
-
   ctx.fillStyle =
     "#e3263f";
 
@@ -1687,8 +2577,6 @@ function generateResultImage() {
   );
 
 
-  /* ORANGE BOTTOM BAR */
-
   ctx.fillStyle =
     "#ff8a24";
 
@@ -1700,10 +2588,6 @@ function generateResultImage() {
     12
   );
 
-
-  /* =====================================================
-     TITLE
-     ===================================================== */
 
   ctx.textAlign =
     "left";
@@ -1724,8 +2608,6 @@ function generateResultImage() {
   );
 
 
-  /* SUBTITLE */
-
   ctx.fillStyle =
     "#ff8a24";
 
@@ -1741,8 +2623,6 @@ function generateResultImage() {
   );
 
 
-  /* TOURNAMENT / MATCH */
-
   ctx.fillStyle =
     "#9aa4b2";
 
@@ -1757,10 +2637,6 @@ function generateResultImage() {
     160
   );
 
-
-  /* =====================================================
-     COLUMN POSITIONS
-     ===================================================== */
 
   const columns = {
 
@@ -1786,10 +2662,6 @@ function generateResultImage() {
 
   };
 
-
-  /* =====================================================
-     TABLE HEADER
-     ===================================================== */
 
   const tableY =
     headerHeight;
@@ -1886,8 +2758,6 @@ function generateResultImage() {
   );
 
 
-  /* SCORE HEADER */
-
   ctx.fillStyle =
     "#ff8a24";
 
@@ -1899,20 +2769,15 @@ function generateResultImage() {
   );
 
 
-  /* =====================================================
-     PLAYER ROWS
-     ===================================================== */
-
   sorted.forEach(
     (player, index) => {
 
       const y =
         tableY +
         tableHeaderHeight +
-        index * rowHeight;
+        index *
+          rowHeight;
 
-
-      /* ROW BACKGROUND */
 
       ctx.fillStyle =
         index % 2 === 0
@@ -1928,21 +2793,19 @@ function generateResultImage() {
       );
 
 
-      /* DIVIDER */
-
       ctx.fillStyle =
         "#252c36";
 
 
       ctx.fillRect(
         40,
-        y + rowHeight - 1,
+        y +
+          rowHeight -
+          1,
         width - 80,
         1
       );
 
-
-      /* RANK */
 
       ctx.textAlign =
         "left";
@@ -1965,8 +2828,6 @@ function generateResultImage() {
       );
 
 
-      /* PLAYER NAME */
-
       ctx.fillStyle =
         "#f5f7fa";
 
@@ -1976,7 +2837,9 @@ function generateResultImage() {
 
 
       let playerName =
-        String(player.name);
+        String(
+          player.name
+        );
 
 
       if (
@@ -1999,8 +2862,6 @@ function generateResultImage() {
       );
 
 
-      /* ACHIEVEMENTS */
-
       ctx.textAlign =
         "center";
 
@@ -2014,10 +2875,9 @@ function generateResultImage() {
 
 
       const achievements =
-        player.achievements || {};
+        player.achievements ||
+        {};
 
-
-      /* WIN */
 
       ctx.fillText(
         achievements.win || 0,
@@ -2026,16 +2886,12 @@ function generateResultImage() {
       );
 
 
-      /* MVP */
-
       ctx.fillText(
         achievements.mvp || 0,
         columns.mvp,
         y + 55
       );
 
-
-      /* QUADRA */
 
       ctx.fillText(
         achievements.quadra || 0,
@@ -2044,16 +2900,12 @@ function generateResultImage() {
       );
 
 
-      /* PENTA */
-
       ctx.fillText(
         achievements.penta || 0,
         columns.penta,
         y + 55
       );
 
-
-      /* PPCC */
 
       ctx.fillText(
         achievements.ppcc || 0,
@@ -2062,8 +2914,6 @@ function generateResultImage() {
       );
 
 
-      /* PERFECT TANK */
-
       ctx.fillText(
         achievements.tank || 0,
         columns.tank,
@@ -2071,16 +2921,12 @@ function generateResultImage() {
       );
 
 
-      /* PERFECT DPS */
-
       ctx.fillText(
         achievements.dps || 0,
         columns.dps,
         y + 55
       );
 
-
-      /* TOTAL SCORE */
 
       ctx.fillStyle =
         "#ff8a24";
@@ -2100,14 +2946,11 @@ function generateResultImage() {
   );
 
 
-  /* =====================================================
-     FOOTER
-     ===================================================== */
-
   const footerY =
     tableY +
     tableHeaderHeight +
-    sorted.length * rowHeight;
+    sorted.length *
+      rowHeight;
 
 
   ctx.fillStyle =
@@ -2152,10 +2995,6 @@ function generateResultImage() {
   );
 
 
-  /* =====================================================
-     PREVIEW
-     ===================================================== */
-
   $("resultImage").src =
     canvas.toDataURL(
       "image/png"
@@ -2177,14 +3016,10 @@ function updatePermissionUI() {
   const addPlayerPanel =
     $("addPlayerPanel");
 
+
   const addPlayerShortcut =
     $("addPlayerShortcutBtn");
 
-
-  /*
-    ADD PLAYER:
-    Admin only.
-  */
 
   if (addPlayerPanel) {
 
@@ -2196,11 +3031,6 @@ function updatePermissionUI() {
   }
 
 
-  /*
-    QUICK ADD:
-    Admin only.
-  */
-
   if (addPlayerShortcut) {
 
     addPlayerShortcut.style.display =
@@ -2211,31 +3041,15 @@ function updatePermissionUI() {
   }
 
 
-  /*
-    ADMIN CONTROLS:
-    Admin only.
-  */
-
   $("adminControls").style.display =
     isAdmin
       ? "grid"
       : "none";
 
 
-  /*
-    Current match input:
-    Viewer can see live match,
-    but cannot control it.
-  */
-
   $("currentMatch").disabled =
     !isAdmin;
 
-
-  /*
-    Scoring inputs:
-    Viewer cannot edit them.
-  */
 
   [
     "winPoints",
@@ -2254,10 +3068,6 @@ function updatePermissionUI() {
     }
   );
 
-
-  /*
-    Admin action buttons.
-  */
 
   [
     "applyScoring",
@@ -2358,7 +3168,7 @@ function formatDate(
 
 
 /* =========================================================
-   DEBUG / FUTURE SUPABASE LAYER
+   DEBUG
    ========================================================= */
 
 window.SOT = {
@@ -2375,11 +3185,14 @@ window.SOT = {
   getMatch: () =>
     currentMatch,
 
+  getDatabase: () =>
+    supabaseClient,
+
   resetAll() {
 
-    localStorage.clear();
-
-    location.reload();
+    alert(
+      "Database reset is disabled from this prototype."
+    );
 
   }
 
