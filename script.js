@@ -26,7 +26,7 @@ const STORAGE_KEYS = {
 
 /* =========================================================
    STORAGE
-   ========================================================= */
+========================================================= */
 
 const Storage = {
 
@@ -133,7 +133,7 @@ const Storage = {
 
 /* =========================================================
    STATE
-   ========================================================= */
+========================================================= */
 
 let players = Storage.loadPlayers();
 
@@ -150,14 +150,14 @@ let isAdmin = false;
 
 /* =========================================================
    HELPER
-   ========================================================= */
+========================================================= */
 
 const $ = id => document.getElementById(id);
 
 
 /* =========================================================
    START
-   ========================================================= */
+========================================================= */
 
 document.addEventListener(
   "DOMContentLoaded",
@@ -175,7 +175,7 @@ document.addEventListener(
 
 /* =========================================================
    EVENTS
-   ========================================================= */
+========================================================= */
 
 function setupEvents() {
 
@@ -227,6 +227,12 @@ function setupEvents() {
   );
 
 
+  $("addPlayerShortcutBtn").addEventListener(
+    "click",
+    focusAddPlayer
+  );
+
+
   $("currentMatch").addEventListener(
     "change",
     event => {
@@ -245,7 +251,7 @@ function setupEvents() {
 
 /* =========================================================
    LOGIN
-   ========================================================= */
+========================================================= */
 
 function openLogin() {
 
@@ -360,7 +366,7 @@ function logout() {
 
 /* =========================================================
    PLAYER
-   ========================================================= */
+========================================================= */
 
 function createPlayer(name) {
 
@@ -455,6 +461,39 @@ function addPlayer(event) {
 
 
   renderEverything();
+
+
+  /* Keep focus here so multiple players can be added quickly. */
+
+  $("playerName").focus();
+
+}
+
+
+function focusAddPlayer() {
+
+  if (!isAdmin) return;
+
+
+  const playerInput =
+    $("playerName");
+
+
+  if (!playerInput) return;
+
+
+  playerInput.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+
+  setTimeout(
+    () => {
+      playerInput.focus();
+    },
+    250
+  );
 
 }
 
@@ -566,7 +605,7 @@ function deletePlayer(id) {
 
 /* =========================================================
    SCORING
-   ========================================================= */
+========================================================= */
 
 function calculateScore(player) {
 
@@ -663,7 +702,7 @@ function changeAchievement(
 
 /* =========================================================
    SCORING SETTINGS
-   ========================================================= */
+========================================================= */
 
 function loadScoringInputs() {
 
@@ -774,7 +813,7 @@ function applyScoring() {
 
 /* =========================================================
    LIVE MATCH
-   ========================================================= */
+========================================================= */
 
 function changeMatch(amount) {
 
@@ -846,7 +885,7 @@ function updateMatchDisplay() {
 
 /* =========================================================
    LEADERBOARD
-   ========================================================= */
+========================================================= */
 
 function updateLeaderboard() {
 
@@ -897,60 +936,21 @@ function updateLeaderboard() {
 
 /* =========================================================
    NEW TOURNAMENT
-   ========================================================= */
+   DOES NOT ARCHIVE
+========================================================= */
 
 function newTournament() {
 
   if (!isAdmin) return;
 
 
-  if (!players.length) {
-
-    alert(
-      "There are no players to archive."
-    );
-
-    return;
-
-  }
-
-
   const confirmed =
     confirm(
-      "Archive this tournament and start a new one?"
+      `Start Tournament ${tournament.number + 1}? The current scoreboard will be cleared and will NOT be archived.`
     );
 
 
   if (!confirmed) return;
-
-
-  recalculateScores();
-
-
-  const archivedTournament = {
-
-    id: Date.now(),
-
-    tournamentNumber:
-      tournament.number,
-
-    date:
-      new Date().toISOString(),
-
-    matchCount:
-      currentMatch,
-
-    players:
-      JSON.parse(
-        JSON.stringify(players)
-      )
-
-  };
-
-
-  history.unshift(
-    archivedTournament
-  );
 
 
   tournament = {
@@ -969,11 +969,6 @@ function newTournament() {
   currentMatch = 1;
 
 
-  Storage.saveHistory(
-    history
-  );
-
-
   Storage.saveTournament(
     tournament
   );
@@ -989,11 +984,19 @@ function newTournament() {
   );
 
 
+  $("resultPreview").style.display =
+    "none";
+
+
+  $("resultImage").src =
+    "";
+
+
   renderEverything();
 
 
   alert(
-    `Tournament ${archivedTournament.tournamentNumber} archived.`
+    `Tournament ${tournament.number} started.`
   );
 
 }
@@ -1001,7 +1004,7 @@ function newTournament() {
 
 /* =========================================================
    STATS
-   ========================================================= */
+========================================================= */
 
 function renderStats() {
 
@@ -1043,7 +1046,7 @@ function renderStats() {
 
 /* =========================================================
    LEADERBOARD RENDER
-   ========================================================= */
+========================================================= */
 
 function achievementCell(
   player,
@@ -1300,7 +1303,7 @@ function renderLeaderboard() {
 
 /* =========================================================
    TOP 5
-   ========================================================= */
+========================================================= */
 
 function renderTopFive() {
 
@@ -1345,21 +1348,21 @@ function renderTopFive() {
       .map(
         (player, index) => `
 
-          <div class="top-player-card">
+          <div class="top-five-item">
 
-            <div class="top-player-rank">
+            <div class="rank">
               #${index + 1}
             </div>
 
 
-            <div class="top-player-name">
+            <div class="player-name">
               ${escapeHTML(
                 player.name
               )}
             </div>
 
 
-            <div class="top-player-score">
+            <div class="score">
               ${player.score}
             </div>
 
@@ -1374,7 +1377,7 @@ function renderTopFive() {
 
 /* =========================================================
    HISTORY
-   ========================================================= */
+========================================================= */
 
 function renderHistory() {
 
@@ -1497,7 +1500,8 @@ function renderHistory() {
 
 /* =========================================================
    RESULT IMAGE
-   ========================================================= */
+   TOP 10 ONLY
+========================================================= */
 
 function generateResultImage() {
 
@@ -1520,9 +1524,31 @@ function generateResultImage() {
 
   const sorted =
     [...players].sort(
-      (a, b) =>
-        b.score - a.score
+      (a, b) => {
+
+        const scoreDifference =
+          b.score - a.score;
+
+
+        if (
+          scoreDifference !== 0
+        ) {
+
+          return scoreDifference;
+
+        }
+
+
+        return a.name.localeCompare(
+          b.name
+        );
+
+      }
     );
+
+
+  const topTen =
+    sorted.slice(0, 10);
 
 
   const canvas =
@@ -1531,14 +1557,28 @@ function generateResultImage() {
     );
 
 
+  const rowHeight =
+    86;
+
+
+  const headerHeight =
+    305;
+
+
+  const bottomPadding =
+    60;
+
+
   canvas.width =
-    1600;
+    1800;
 
 
   canvas.height =
     Math.max(
-      900,
-      420 + sorted.length * 90
+      760,
+      headerHeight +
+      topTen.length * rowHeight +
+      bottomPadding
     );
 
 
@@ -1548,7 +1588,9 @@ function generateResultImage() {
     );
 
 
-  /* Background */
+  /* =======================================================
+     BACKGROUND
+  ======================================================= */
 
   ctx.fillStyle =
     "#07090d";
@@ -1590,7 +1632,9 @@ function generateResultImage() {
   );
 
 
-  /* Title */
+  /* =======================================================
+     TITLE
+  ======================================================= */
 
   ctx.fillStyle =
     "#f5f7fa";
@@ -1602,8 +1646,8 @@ function generateResultImage() {
 
   ctx.fillText(
     "SOT SCOREBOARD",
-    80,
-    110
+    70,
+    92
   );
 
 
@@ -1619,16 +1663,148 @@ function generateResultImage() {
 
   ctx.fillText(
     "SATURDAY OPEN TOURNAMENT",
-    84,
-    155
+    74,
+    135
   );
 
 
-  let y = 240;
+  /* Tournament number */
+
+  ctx.fillStyle =
+    "#8f98a8";
 
 
-  sorted.forEach(
+  ctx.font =
+    "700 23px Arial";
+
+
+  ctx.fillText(
+    `TOURNAMENT ${tournament.number}`,
+    74,
+    175
+  );
+
+
+  /* =======================================================
+     TABLE HEADER
+  ======================================================= */
+
+  const tableX =
+    50;
+
+
+  const tableWidth =
+    1700;
+
+
+  const headerY =
+    225;
+
+
+  ctx.fillStyle =
+    "#11161e";
+
+
+  ctx.fillRect(
+    tableX,
+    headerY - 36,
+    tableWidth,
+    58
+  );
+
+
+  ctx.fillStyle =
+    "#8f98a8";
+
+
+  ctx.font =
+    "900 18px Arial";
+
+
+  ctx.fillText(
+    "RANK",
+    72,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "PLAYER",
+    155,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "WIN",
+    700,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "MVP",
+    810,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "QUADRA",
+    920,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "PENTA",
+    1060,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "PPCC",
+    1185,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "TANK",
+    1295,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "DPS",
+    1405,
+    headerY
+  );
+
+
+  ctx.fillText(
+    "SCORE",
+    1510,
+    headerY
+  );
+
+
+  /* =======================================================
+     PLAYER ROWS
+  ======================================================= */
+
+  let y =
+    285;
+
+
+  topTen.forEach(
     (player, index) => {
+
+      const a =
+        player.achievements;
+
 
       /* Row */
 
@@ -1639,10 +1815,10 @@ function generateResultImage() {
 
 
       ctx.fillRect(
-        70,
-        y - 48,
-        1460,
-        70
+        tableX,
+        y - 35,
+        tableWidth,
+        68
       );
 
 
@@ -1655,12 +1831,12 @@ function generateResultImage() {
 
 
       ctx.font =
-        "900 30px Arial";
+        "900 24px Arial";
 
 
       ctx.fillText(
         `#${index + 1}`,
-        95,
+        72,
         y
       );
 
@@ -1671,9 +1847,76 @@ function generateResultImage() {
         "#f5f7fa";
 
 
+      ctx.font =
+        "900 23px Arial";
+
+
       ctx.fillText(
-        player.name,
-        190,
+        truncateText(
+          ctx,
+          player.name,
+          500
+        ),
+        155,
+        y
+      );
+
+
+      /* Achievements */
+
+      ctx.font =
+        "800 21px Arial";
+
+
+      ctx.fillStyle =
+        "#e7eaf0";
+
+
+      ctx.fillText(
+        String(a.win),
+        700,
+        y
+      );
+
+
+      ctx.fillText(
+        String(a.mvp),
+        810,
+        y
+      );
+
+
+      ctx.fillText(
+        String(a.quadra),
+        920,
+        y
+      );
+
+
+      ctx.fillText(
+        String(a.penta),
+        1060,
+        y
+      );
+
+
+      ctx.fillText(
+        String(a.ppcc),
+        1185,
+        y
+      );
+
+
+      ctx.fillText(
+        String(a.tank),
+        1295,
+        y
+      );
+
+
+      ctx.fillText(
+        String(a.dps),
+        1405,
         y
       );
 
@@ -1684,18 +1927,45 @@ function generateResultImage() {
         "#ff8a24";
 
 
+      ctx.font =
+        "900 24px Arial";
+
+
       ctx.fillText(
         String(player.score),
-        1390,
+        1510,
         y
       );
 
 
-      y += 90;
+      y += rowHeight;
 
     }
   );
 
+
+  /* =======================================================
+     FOOTER
+  ======================================================= */
+
+  ctx.fillStyle =
+    "#697282";
+
+
+  ctx.font =
+    "700 17px Arial";
+
+
+  ctx.fillText(
+    `TOP ${topTen.length} • SOT SCOREBOARD`,
+    70,
+    canvas.height - 32
+  );
+
+
+  /* =======================================================
+     DISPLAY IMAGE
+  ======================================================= */
 
   $("resultImage").src =
     canvas.toDataURL(
@@ -1706,12 +1976,67 @@ function generateResultImage() {
   $("resultPreview").style.display =
     "block";
 
+
+  $("resultPreview").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
+}
+
+
+/* =========================================================
+   CANVAS TEXT HELPER
+========================================================= */
+
+function truncateText(
+  ctx,
+  text,
+  maxWidth
+) {
+
+  const value =
+    String(text);
+
+
+  if (
+    ctx.measureText(value).width <=
+    maxWidth
+  ) {
+
+    return value;
+
+  }
+
+
+  let shortened =
+    value;
+
+
+  while (
+    shortened.length > 1 &&
+    ctx.measureText(
+      shortened + "..."
+    ).width > maxWidth
+  ) {
+
+    shortened =
+      shortened.slice(
+        0,
+        -1
+      );
+
+  }
+
+
+  return shortened + "...";
+
 }
 
 
 /* =========================================================
    RENDER EVERYTHING
-   ========================================================= */
+========================================================= */
 
 function renderEverything() {
 
@@ -1727,12 +2052,20 @@ function renderEverything() {
 
   updateMatchDisplay();
 
+
+  /* Admin-only shortcut */
+
+  $("addPlayerShortcutBtn").style.display =
+    isAdmin
+      ? "inline-block"
+      : "none";
+
 }
 
 
 /* =========================================================
    SECURITY / HTML ESCAPE
-   ========================================================= */
+========================================================= */
 
 function escapeHTML(value) {
 
@@ -1768,7 +2101,7 @@ function escapeHTML(value) {
 
 /* =========================================================
    DATE
-   ========================================================= */
+========================================================= */
 
 function formatDate(
   dateString
@@ -1790,7 +2123,7 @@ function formatDate(
 
 /* =========================================================
    DEBUG / FUTURE SUPABASE LAYER
-   ========================================================= */
+========================================================= */
 
 window.SOT = {
 
